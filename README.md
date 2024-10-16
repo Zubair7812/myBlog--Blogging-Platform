@@ -1,7 +1,7 @@
 ### Clone the Repository
 
 ```bash
-git clone https://github.com/Zubair7812/myBlog-Blogging-Platform.git
+git clone https://github.com/Zubair7812/myBlog--Blogging-Platform.git
 cd Blogging-Website
 ```
 ### Install dependencies
