@@ -2,7 +2,7 @@
 
 ```bash
 git clone https://github.com/Zubair7812/myBlog--Blogging-Platform.git
-cd Blogging-Website
+cd myBlog--Blogging-Platform
 ```
 ### Install dependencies
 ```console 
