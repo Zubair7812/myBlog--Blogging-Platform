@@ -1,51 +1,37 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="/css/edit-profile-style.css">
-</head>
-<body>
-    <main>
-        <div class="edit-container">
-            <h1>Edit profile</h1>
-            <form action="" method="post" class="forms-container" enctype="multipart/form-data">
-                <div>
-                    <label for="">Username</label>
-                    <input type="text" readonly value="<%=username%>">
-                    <label for="">Full Name</label>
-                    <input type="text" name="fullname" value="<%=userdata.fullname%>">
-                    <label for="">E-mail</label>
-                    <input type="text" readonly value="<%=email%>">
-                    <label for="">Bio</label>
-                    <textarea id="" cols="30" rows="10" name="bio"><%=userdata.bio%></textarea>
-                    <label for="">Profile Picture</label>
-                    <input type="file" class="custom-file-input" name="image">
-                 </div>
+<%- include('partials/header') %>
 
-                <div>
-                    <label for="">Website Link</label>
-                    <input type="text" name="weblink"  value="<%=userdata.weblink%>">
-                    <label for="">Facbook Profile </label>
-                    <input type="text" name="fb"  value="<%=userdata.facebook%>">
-                    <label for="">Instagram Profile</label>
-                    <input type="text" name="insta" value="<%=userdata.instagram%>">
-                    <label for="">Twitter Profile</label>
-                    <input type="text" name="tw" value="<%=userdata.twitter%>">
-                    <label for="">Whatsapp Number</label>
-                    <input type="text" name="wa" value="<%=userdata.whatsapp%>">
-                    <label for="">Phone Number</label>
-                    <input type="text" name="phno" value="<%=userdata.phoneno%>">
-                    <div class="buttons">
-                        <input type="reset" value="Discard">
-                        <input type="submit" value="save">
-                    </div>
-                </div>
+    <div class="form-container">
+        <h1>Edit Profile</h1>
+        <form action="/editprofile/<%= username %>" method="post" enctype="multipart/form-data">
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" name="fullname" value="<%= userdata.fullname %>">
+            </div>
+            <div class="form-group">
+                <label>Profile Picture</label>
+                <input type="file" name="image">
+            </div>
+            <div class="form-group">
+                <label>Bio</label>
+                <textarea name="bio" rows="3"><%= userdata.bio %></textarea>
+            </div>
+
+            <h3>Social Links</h3>
+            <div class="form-group">
+                <label>Facebook</label>
+                <input type="text" name="fb" value="<%= userdata.facebook %>">
+            </div>
+            <div class="form-group">
+                <label>Twitter</label>
+                <input type="text" name="tw" value="<%= userdata.twitter %>">
+            </div>
+            <div class="form-group">
+                <label>Instagram</label>
+                <input type="text" name="insta" value="<%= userdata.instagram %>">
+            </div>
+
+            <button type="submit" class="submit-btn">Save Changes</button>
         </form>
-        </div>
-    </main>
-    
-</body>
-</html>
+    </div>
+
+    <%- include('partials/footer') %>

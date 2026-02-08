@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>myBlog - Share Your Story</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/eabac940d1.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <nav>
+        <div class="logo">
+            <a href="/home"><i class="fa-solid fa-feather"></i> myBlog</a>
+        </div>
+        <div class="nav-items">
+            <ul>
+                <li><a href="/home">Home</a></li>
+                <% if(typeof user !== 'undefined' && user) { %>
+                    <% if(typeof userType !== 'undefined' && userType === 'admin') { %>
+                        <li><a href="/admin">Dashboard</a></li>
+                    <% } else { %>
+                        <li><a href="/profile/<%= user %>">My Profile</a></li>
+                    <% } %>
+                    <li><a href="/logout">Logout</a></li>
+                <% } else { %>
+                    <li><a href="/">Login</a></li>
+                <% } %>
+            </ul>
+        </div>
+    </nav>
+    <main>
