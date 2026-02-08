@@ -1,36 +1,45 @@
 <%- include('partials/header') %>
 
-    <div class="form-container">
-        <h1>Edit Profile</h1>
+    <div class="form-container" style="max-width: 600px;">
+        <h1 style="text-align: center; margin-bottom: 2rem;">Edit Public Profile</h1>
         <form action="/editprofile/<%= username %>" method="post" enctype="multipart/form-data">
-            <div class="form-group">
-                <label>Full Name</label>
-                <input type="text" name="fullname" value="<%= userdata.fullname %>">
+            <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
+                <div class="form-group" style="flex: 1; min-width: 250px;">
+                    <label>Full Name</label>
+                    <input type="text" name="fullname" value="<%= userdata.fullname %>">
+                </div>
+                <div class="form-group" style="flex: 1; min-width: 250px;">
+                    <label>Profile Picture</label>
+                    <input type="file" name="image" style="padding: 0.5rem; background: white;">
+                </div>
             </div>
-            <div class="form-group">
-                <label>Profile Picture</label>
-                <input type="file" name="image">
-            </div>
+
             <div class="form-group">
                 <label>Bio</label>
-                <textarea name="bio" rows="3"><%= userdata.bio %></textarea>
+                <textarea name="bio" rows="4"
+                    placeholder="Tell the world about yourself..."><%= userdata.bio %></textarea>
             </div>
 
-            <h3>Social Links</h3>
+            <h3
+                style="margin: 1.5rem 0 1rem; color: var(--text-light); border-bottom: 2px solid rgba(0,0,0,0.05); padding-bottom: 0.5rem;">
+                Social Links</h3>
+
             <div class="form-group">
-                <label>Facebook</label>
-                <input type="text" name="fb" value="<%= userdata.facebook %>">
+                <label><i class="fa-brands fa-facebook" style="color: #3b5998;"></i> Facebook URL</label>
+                <input type="text" name="fb" value="<%= userdata.facebook %>"
+                    placeholder="https://facebook.com/username">
             </div>
             <div class="form-group">
-                <label>Twitter</label>
-                <input type="text" name="tw" value="<%= userdata.twitter %>">
+                <label><i class="fa-brands fa-twitter" style="color: #1da1f2;"></i> Twitter URL</label>
+                <input type="text" name="tw" value="<%= userdata.twitter %>" placeholder="https://twitter.com/username">
             </div>
             <div class="form-group">
-                <label>Instagram</label>
-                <input type="text" name="insta" value="<%= userdata.instagram %>">
+                <label><i class="fa-brands fa-instagram" style="color: #c13584;"></i> Instagram URL</label>
+                <input type="text" name="insta" value="<%= userdata.instagram %>"
+                    placeholder="https://instagram.com/username">
             </div>
 
-            <button type="submit" class="submit-btn">Save Changes</button>
+            <button type="submit" class="submit-btn" style="width: 100%; margin-top: 1rem;">Save Changes</button>
         </form>
     </div>
 

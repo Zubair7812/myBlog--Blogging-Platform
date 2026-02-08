@@ -1,44 +1,86 @@
 <%- include('partials/header') %>
 
-    <div class="section-header">
-        <h1>Latest Stories</h1>
-        <a href="/compose"><button class="compose-btn"><i class="fa-solid fa-pen-nib"></i> Write Story</button></a>
+    <div class="hero-section">
+        <h1>Stories for the <br> Curious Mind.</h1>
+        <p>In-depth analysis, thoughtful essays, and fresh perspectives on what matters most.</p>
     </div>
 
-    <% if(sposts && sposts.length> 0) { %>
-        <div class="posts-grid">
-            <% sposts.forEach((post)=> { %>
-                <div class="post-card">
-                    <a href="/posts/<%= post._id %>">
+    <div class="home-layout">
+        <!-- Main Content: Posts Feed -->
+        <div class="main-feed">
+            <h3 style="border-bottom: 2px solid var(--primary-color); padding-bottom: 0.5rem; margin-bottom: 2rem;">
+                Latest Articles</h3>
+
+            <% if(sposts && sposts.length> 0) { %>
+                <% sposts.forEach((post)=> { %>
+                    <div class="post-card">
                         <div class="img-container">
-                            <img src="/thumbnails/<%= post.thumbnail %>" alt="<%= post.title %>"
-                                onerror="this.onerror=null; this.src='/images/default-image.png'">
+                            <a href="/posts/<%= post._id %>">
+                                <img src="/thumbnails/<%= post.thumbnail %>" alt="<%= post.title %>"
+                                    onerror="this.onerror=null; this.src='https://source.unsplash.com/random/800x600?nature'">
+                            </a>
                         </div>
                         <div class="card-content">
-                            <div class="card-title">
-                                <%= post.title %>
-                            </div>
-                            <div class="card-excerpt">
-                                <%= post.content.substring(0, 100) %>...
-                            </div>
-                            <div class="card-footer">
+                            <div class="card-meta">
                                 <span><i class="fa-solid fa-user"></i>
                                     <%= post.author %>
-                                </span>
-                                <span><i class="fa-solid fa-heart"></i>
-                                    <%= post.like %>
+                                </span> &bull; <span>
+                                    <%= new Date(post.date).toLocaleDateString() %>
                                 </span>
                             </div>
+                            <a href="/posts/<%= post._id %>">
+                                <h2 class="card-title">
+                                    <%= post.title %>
+                                </h2>
+                            </a>
+                            <p class="card-excerpt">
+                                <%= post.content.substring(0, 150) %>...
+                            </p>
+                            <a href="/posts/<%= post._id %>"
+                                style="color: var(--accent-color); font-weight: 700; font-size: 0.9rem;">Read Story
+                                &rarr;</a>
                         </div>
-                    </a>
-                </div>
-                <% }) %>
+                    </div>
+                    <% }) %>
+                        <% } else { %>
+                            <div style="text-align: center; padding: 4rem;">
+                                <p>No stories published yet.</p>
+                            </div>
+                            <% } %>
         </div>
-        <% } else { %>
-            <div style="text-align: center; padding: 4rem;">
-                <img src="/images/blog-vector-art.png" alt="No posts" style="max-width: 300px; opacity: 0.8;">
-                <h2>No stories yet. Be the first to write one!</h2>
-            </div>
-            <% } %>
 
-                <%- include('partials/footer') %>
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <h3>Trending Topics</h3>
+            <div class="sidebar-item">
+                <a href="#">The Future of AI</a>
+                <span>Technology • 5 min read</span>
+            </div>
+            <div class="sidebar-item">
+                <a href="#">Minimalist Living</a>
+                <span>Lifestyle • 3 min read</span>
+            </div>
+            <div class="sidebar-item">
+                <a href="#">Modern Architecture</a>
+                <span>Design • 7 min read</span>
+            </div>
+
+            <h3 style="margin-top: 3rem;">Who to Follow</h3>
+            <div class="sidebar-item" style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 40px; height: 40px; background: #ddd; border-radius: 50%;"></div>
+                <div>
+                    <a href="#" style="margin: 0;">Sarah Jenkins</a>
+                    <span>Tech Journalist</span>
+                </div>
+            </div>
+            <div class="sidebar-item" style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 40px; height: 40px; background: #ddd; border-radius: 50%;"></div>
+                <div>
+                    <a href="#" style="margin: 0;">David Ross</a>
+                    <span>Design Lead</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <%- include('partials/footer') %>

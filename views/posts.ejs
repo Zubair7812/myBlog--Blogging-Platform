@@ -5,18 +5,30 @@
       <h1>
         <%= posts.title %>
       </h1>
-      <div class="post-meta">
-        <span>By <strong>
+      <div
+        style="color: var(--text-light); text-transform: uppercase; letter-spacing: 1px; font-size: 0.9rem; display: flex; justify-content: center; align-items: center; gap: 1rem;">
+        <span>By <a href="/profile/<%= posts.author %>"
+            style="color: var(--primary-color); font-weight: 700; text-decoration: underline;">
             <%= posts.author %>
-          </strong></span>
-        <span>
-          <%= new Date(posts.date).toLocaleDateString() %>
-        </span>
+          </a></span>
+
+        <% if(user && user !==posts.author && authorUser) { %>
+          <button id="postFollowBtn"
+            style="background: <%= authorUser.followers && authorUser.followers.includes(currentUserId) ? 'var(--primary-color)' : 'white' %>; border: 1px solid var(--primary-color); color: <%= authorUser.followers && authorUser.followers.includes(currentUserId) ? 'white' : 'var(--primary-color)' %>; padding: 0.2rem 0.8rem; border-radius: 50px; font-size: 0.8rem; cursor: pointer; transition: all 0.3s;">
+            <%= authorUser.followers && authorUser.followers.includes(currentUserId) ? 'Unfollow' : 'Follow' %>
+          </button>
+          <a href="/chat/<%= posts.author %>?share=/posts/<%= posts._id %>"
+            style="color: var(--text-light); transition: color 0.3s; margin-left: 0.5rem;" title="Message Author"><i
+              class="fa-regular fa-paper-plane"></i></a>
+          <% } %>
+
+            <span>&bull; <%= new Date(posts.date).toLocaleDateString() %></span>
       </div>
     </div>
 
     <img src="/thumbnails/<%= posts.thumbnail %>" alt="<%= posts.title %>"
-      onerror="this.onerror=null; this.src='/images/default-image.png'">
+      onerror="this.onerror=null; this.src='https://source.unsplash.com/random/1200x600?nature'"
+      style="width: 100%; height: auto; margin-bottom: 3rem; border-radius: var(--border-radius);">
 
     <div class="post-content">
       <p style="white-space: pre-wrap;">
@@ -24,22 +36,64 @@
       </p>
     </div>
 
-    <div style="margin-top: 3rem; display: flex; gap: 1rem; align-items: center;">
+    <!-- Actions -->
+    <div
+      style="margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
       <button id="likeBtn" class="compose-btn"
-        style="background: <%= posts.likedby.includes(user) ? '#ff7675' : '#6c5ce7' %>">
-        <i class="fa-solid fa-heart"></i> <span id="likeCount">
+        style="background: <%= posts.likedby.includes(user) ? 'var(--accent-color)' : 'white' %>; color: <%= posts.likedby.includes(user) ? 'white' : 'var(--primary-color)' %>; border: 1px solid var(--primary-color);">
+        <i class="<%= posts.likedby.includes(user) ? 'fa-solid' : 'fa-regular' %> fa-heart"></i> <span id="likeCount">
           <%= posts.like %>
         </span> Likes
       </button>
 
       <% if(user===posts.author || userType==='admin' ) { %>
-        <a href="/update/<%= posts._id %>" style="color: var(--text-light);"><i class="fa-solid fa-edit"></i> Edit</a>
-        <a href="/delete/<%= posts._id %>" style="color: #ff7675;"><i class="fa-solid fa-trash"></i> Delete</a>
+        <div>
+          <a href="/update/<%= posts._id %>" style="color: var(--text-light); margin-right: 1rem;"><i
+              class="fa-solid fa-pen"></i> Edit</a>
+          <a href="/delete/<%= posts._id %>" style="color: #c0392b;"><i class="fa-solid fa-trash"></i> Delete</a>
+        </div>
         <% } %>
+    </div>
+
+    <!-- Comment Section -->
+    <div class="comments-section">
+      <h3>Discussion (<%= comments.length %>)</h3>
+
+      <!-- Add Comment -->
+      <form action="/posts/<%= posts._id %>/comment" method="post" style="margin-bottom: 3rem;">
+        <div class="form-group">
+          <textarea name="comment" rows="3" placeholder="Join the conversation..."
+            style="width: 100%; padding: 1rem; border: 1px solid var(--border-color); border-radius: 4px;"
+            required></textarea>
+        </div>
+        <button type="submit" class="submit-btn" style="font-size: 0.9rem; padding: 0.6rem 1.5rem;">Post
+          Comment</button>
+      </form>
+
+      <!-- List Comments -->
+      <% if(comments.length> 0) { %>
+        <% comments.forEach((comment)=> { %>
+          <div class="comment-card">
+            <div class="comment-header">
+              <span class="comment-author">@<%= comment.username %></span>
+              <span class="comment-date">
+                <%= new Date(comment.date).toLocaleDateString() %>
+              </span>
+            </div>
+            <p style="color: var(--text-color);">
+              <%= comment.content %>
+            </p>
+          </div>
+          <% }) %>
+            <% } else { %>
+              <p style="color: var(--text-light); text-align: center;">No comments yet. Be the first to start the
+                discussion.</p>
+              <% } %>
     </div>
   </div>
 
   <script>
+    // Like Logic
     document.getElementById('likeBtn').addEventListener('click', async () => {
       try {
         const res = await fetch('/posts/<%= posts._id %>/like', { method: 'POST' });
@@ -47,19 +101,53 @@
 
         const likeCount = document.getElementById('likeCount');
         const btn = document.getElementById('likeBtn');
+        const icon = btn.querySelector('i');
         let currentLikes = parseInt(likeCount.innerText);
 
         if (data.status === 'liked') {
           likeCount.innerText = currentLikes + 1;
-          btn.style.background = '#ff7675';
+          btn.style.background = 'var(--accent-color)';
+          btn.style.color = 'white';
+          icon.classList.remove('fa-regular');
+          icon.classList.add('fa-solid');
         } else {
           likeCount.innerText = currentLikes - 1;
-          btn.style.background = '#6c5ce7';
+          btn.style.background = 'white';
+          btn.style.color = 'var(--primary-color)';
+          icon.classList.remove('fa-solid');
+          icon.classList.add('fa-regular');
         }
-      } catch (err) {
-        console.error('Error liking post', err);
-      }
+      } catch (err) { console.error(err); }
     });
+
+    // Follow Logic (Direct Action)
+    const postFollowBtn = document.getElementById('postFollowBtn');
+    if (postFollowBtn) {
+      postFollowBtn.addEventListener('click', async () => {
+        const isFollowing = postFollowBtn.innerText.trim() === 'Unfollow';
+        // We need author's ID, which we can get from EJS if we pass it, or we rely on the button state.
+        // Ideally inject it:
+        const authorId = '<%= authorUser ? authorUser._id : "" %>';
+        if (!authorId) return;
+
+        const url = isFollowing ? '/unfollow/' + authorId : '/follow/' + authorId;
+
+        try {
+          const res = await fetch(url, { method: 'POST' });
+          const data = await res.json();
+
+          if (data.status === 'followed') {
+            postFollowBtn.innerText = 'Unfollow';
+            postFollowBtn.style.background = 'var(--primary-color)';
+            postFollowBtn.style.color = 'white';
+          } else if (data.status === 'unfollowed') {
+            postFollowBtn.innerText = 'Follow';
+            postFollowBtn.style.background = 'white';
+            postFollowBtn.style.color = 'var(--primary-color)';
+          }
+        } catch (err) { console.error('Error toggling follow', err); }
+      });
+    }
   </script>
 
   <%- include('partials/footer') %>

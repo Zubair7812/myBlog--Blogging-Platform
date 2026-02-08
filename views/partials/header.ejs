@@ -1,32 +1,69 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>myBlog - Share Your Story</title>
+    <title>The Daily Blog - Editorial</title>
     <link rel="stylesheet" href="/css/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://kit.fontawesome.com/eabac940d1.js" crossorigin="anonymous"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
+
 <body>
     <nav>
         <div class="logo">
-            <a href="/home"><i class="fa-solid fa-feather"></i> myBlog</a>
+            <a href="/home"><i class="fa-solid fa-feather-pointed"></i> myBlog</a>
         </div>
+
+        <div class="nav-center">
+            <form action="/search" method="get" class="nav-search">
+                <input type="text" name="q" placeholder="Search stories, people, or topics...">
+                <button type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
+            </form>
+        </div>
+
         <div class="nav-items">
             <ul>
-                <li><a href="/home">Home</a></li>
-                <% if(typeof user !== 'undefined' && user) { %>
-                    <% if(typeof userType !== 'undefined' && userType === 'admin') { %>
-                        <li><a href="/admin">Dashboard</a></li>
-                    <% } else { %>
-                        <li><a href="/profile/<%= user %>">My Profile</a></li>
-                    <% } %>
-                    <li><a href="/logout">Logout</a></li>
-                <% } else { %>
-                    <li><a href="/">Login</a></li>
-                <% } %>
+                <% if(typeof user !=='undefined' && user) { %>
+                    <li><a href="/chat" title="Messages"><i class="fa-regular fa-paper-plane"
+                                style="font-size: 1.2rem;"></i></a></li>
+                    <li>
+                        <a href="/notifications" style="position: relative;">
+                            <i class="fa-regular fa-bell" style="font-size: 1.2rem;"></i>
+                            <span id="notif-badge"
+                                style="display: none; position: absolute; top: -5px; right: -5px; background: var(--accent-color); color: white; border-radius: 50%; width: 8px; height: 8px;"></span>
+                        </a>
+                    </li>
+                    <li><a href="/compose">Write Story</a></li>
+                    <% if(typeof userType !=='undefined' && userType==='admin' ) { %>
+                        <li><a href="/admin">Admin</a></li>
+                        <% } else { %>
+                            <li><a href="/profile/<%= user %>">Profile</a></li>
+                            <% } %>
+                                <li><a href="/logout">Logout</a></li>
+                                <% } else { %>
+                                    <li><a href="/" class="compose-btn"
+                                            style="padding: 0.5rem 1.5rem; font-size: 0.8rem;">Login</a></li>
+                                    <% } %>
             </ul>
         </div>
     </nav>
+
+    <script>
+    // Poll for notifications
+    <% if (typeof user !== 'undefined' && user) { %>
+            async function checkNotifications() {
+                try {
+                    const res = await fetch('/api/notifications/unread');
+                    const data = await res.json();
+                    const badge = document.getElementById('notif-badge');
+                    if (data.count > 0 && badge) {
+                        badge.style.display = 'block';
+                    }
+                } catch (e) { }
+            }
+            checkNotifications();
+            setInterval(checkNotifications, 30000); // Check every 30s
+    <% } %>
+    </script>
     <main>

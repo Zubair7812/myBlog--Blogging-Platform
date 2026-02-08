@@ -1,14 +1,43 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const Blog = require('../models/Blog');
+const Blog = require("../models/Blog");
+const User = require("../models/User");
 
-router.post('/search', async (req, res) => {
+// Main Search Route
+router.get("/search", async (req, res) => {
+    const query = req.query.q;
+    const filter = req.query.filter || 'all'; // 'all', 'posts', 'people'
+
+    if (!query) return res.redirect("/home");
+
     try {
-        let payload = req.body.payload.trim();
-        let search = await Blog.find({ title: { $regex: new RegExp('^' + payload + '.*', 'i') } }).limit(10).exec();
-        res.send({ payload: search });
+        let posts = [];
+        let users = [];
+
+        if (filter === 'all' || filter === 'posts') {
+            posts = await Blog.find({
+                title: { $regex: query, $options: "i" }
+            });
+        }
+
+        if (filter === 'all' || filter === 'people') {
+            users = await User.find({
+                fullname: { $regex: query, $options: "i" }
+            });
+        }
+
+        res.render("search", {
+            query: query,
+            posts: posts,
+            users: users,
+            filter: filter,
+            user: req.session.username,
+            userType: req.session.type
+        });
+
     } catch (err) {
-        res.status(500).send({ payload: [] });
+        console.log(err);
+        res.redirect("/home");
     }
 });
 

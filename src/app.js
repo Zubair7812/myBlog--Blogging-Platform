@@ -37,9 +37,18 @@ app.use((req, res, next) => {
 // Routes
 app.use('/', require('./routes/indexRoutes'));
 app.use('/', require('./routes/authRoutes'));
-app.use('/', require('./routes/blogRoutes'));
-app.use('/', require('./routes/userRoutes'));
-app.use('/', require('./routes/searchRoutes'));
+
+const blogRoutes = require("./routes/blogRoutes");
+const userRoutes = require("./routes/userRoutes");
+const searchRoutes = require("./routes/searchRoutes");
+const notificationRoutes = require("./routes/notificationRoutes");
+const chatRoutes = require("./routes/chatRoutes");
+
+app.use(blogRoutes);
+app.use(userRoutes);
+app.use(searchRoutes);
+app.use(notificationRoutes);
+app.use(chatRoutes);
 
 // 404 Handler
 app.use((req, res) => {
