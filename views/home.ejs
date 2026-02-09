@@ -51,35 +51,43 @@
 
         <!-- Sidebar -->
         <div class="sidebar">
-            <h3>Trending Topics</h3>
-            <div class="sidebar-item">
-                <a href="#">The Future of AI</a>
-                <span>Technology • 5 min read</span>
-            </div>
-            <div class="sidebar-item">
-                <a href="#">Minimalist Living</a>
-                <span>Lifestyle • 3 min read</span>
-            </div>
-            <div class="sidebar-item">
-                <a href="#">Modern Architecture</a>
-                <span>Design • 7 min read</span>
-            </div>
+            <h3>Trending Topics <span
+                    style="font-size: 0.6rem; background: var(--accent-color); color: white; padding: 2px 5px; border-radius: 4px; vertical-align: middle;">AI</span>
+            </h3>
 
-            <h3 style="margin-top: 3rem;">Who to Follow</h3>
-            <div class="sidebar-item" style="display: flex; align-items: center; gap: 10px;">
-                <div style="width: 40px; height: 40px; background: #ddd; border-radius: 50%;"></div>
-                <div>
-                    <a href="#" style="margin: 0;">Sarah Jenkins</a>
-                    <span>Tech Journalist</span>
-                </div>
-            </div>
-            <div class="sidebar-item" style="display: flex; align-items: center; gap: 10px;">
-                <div style="width: 40px; height: 40px; background: #ddd; border-radius: 50%;"></div>
-                <div>
-                    <a href="#" style="margin: 0;">David Ross</a>
-                    <span>Design Lead</span>
-                </div>
-            </div>
+            <% if(typeof trendingPosts !=='undefined' && trendingPosts.length> 0) { %>
+                <% trendingPosts.forEach(post=> { %>
+                    <div class="sidebar-item">
+                        <a href="/posts/<%= post._id %>">
+                            <%= post.title %>
+                        </a>
+                        <span>
+                            <%= post.author %> • <%= new Date(post.date).toLocaleDateString() %>
+                        </span>
+                    </div>
+                    <% }) %>
+                        <% } else { %>
+                            <div class="sidebar-item">
+                                <span style="color: var(--text-light); font-style: italic;">Trending issues
+                                    loading...</span>
+                            </div>
+                            <% } %>
+
+                                <h3 style="margin-top: 3rem;">Who to Follow</h3>
+                                <div class="sidebar-item" style="display: flex; align-items: center; gap: 10px;">
+                                    <div style="width: 40px; height: 40px; background: #ddd; border-radius: 50%;"></div>
+                                    <div>
+                                        <a href="#" style="margin: 0;">Sarah Jenkins</a>
+                                        <span>Tech Journalist</span>
+                                    </div>
+                                </div>
+                                <div class="sidebar-item" style="display: flex; align-items: center; gap: 10px;">
+                                    <div style="width: 40px; height: 40px; background: #ddd; border-radius: 50%;"></div>
+                                    <div>
+                                        <a href="#" style="margin: 0;">David Ross</a>
+                                        <span>Design Lead</span>
+                                    </div>
+                                </div>
         </div>
     </div>
 

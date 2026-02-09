@@ -42,26 +42,21 @@ router.post('/signup', async (req, res) => {
     }
 });
 
-// --- Login ---
-router.post('/login', async (req, res) => {
+// Login Logic
+router.post("/login", async (req, res) => {
     try {
-        const { email, password } = req.body;
-        const user = await User.findOne({ email });
+        const { username, password } = req.body;
+        const user = await User.findOne({ username });
 
         if (!user) {
-            return res.send("<script>alert('Wrong details');window.location.href = '/'</script>");
+            return res.render("login", { error: "User not found" });
         }
 
-        // Compare password
-        // Check if password is hashed (legacy support check could go here if needed, but we're moving to bcrypt)
         const isMatch = await bcrypt.compare(password, user.password);
-
         if (!isMatch) {
-            return res.send("<script>alert('Wrong Password');window.location.href = '/'</script>");
+            return res.render("login", { error: "Invalid credentials" });
         }
 
-        // Session setup
-        req.session.user = user;
         req.session.username = user.username;
         req.session.type = user.type;
         req.session.useremail = user.email;

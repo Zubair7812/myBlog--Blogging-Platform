@@ -22,6 +22,10 @@ const blogSchema = new mongoose.Schema({
     date: {
         type: Date,
         default: Date.now
+    },
+    isAiGenerated: {
+        type: Boolean,
+        default: false
     }
 }, { collection: 'Blogs', timestamps: true });
 
