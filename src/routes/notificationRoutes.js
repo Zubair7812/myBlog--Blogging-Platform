@@ -19,7 +19,8 @@ router.get("/notifications", checkAuth, async (req, res) => {
             .sort({ createdAt: -1 });
 
         // Mark as read (optional logic: mark when viewed)
-        // await Notification.updateMany({ recipient: currentUser._id, read: false }, { read: true });
+        // Mark as read (optional logic: mark when viewed)
+        await Notification.updateMany({ recipient: currentUser._id, read: false }, { $set: { read: true } });
 
         res.render("notifications", {
             notifications,

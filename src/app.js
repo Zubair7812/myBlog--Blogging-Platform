@@ -17,7 +17,7 @@ app.use(express.static("public"));
 app.set("view engine", "ejs");
 
 // Session Setup
-app.use(sessions({
+const sessionMiddleware = sessions({
   secret: process.env.SESSION_SECRET || "secret key",
   resave: false,
   saveUninitialized: false,
@@ -25,7 +25,9 @@ app.use(sessions({
     mongoUrl: process.env.MONGO_URL || 'mongodb://127.0.0.1:27017/myBlog'
   }),
   cookie: { maxAge: 1000 * 60 * 60 * 24 } // 1 day
-}));
+});
+
+app.use(sessionMiddleware);
 
 // Global User Middleware (to make 'user' available in all views)
 app.use((req, res, next) => {

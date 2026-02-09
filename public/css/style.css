@@ -111,16 +111,13 @@ nav {
 }
 
 .logo a {
-    font-family: var(--font-heading);
-    font-size: 1.8rem;
-    color: var(--primary-color);
-    font-weight: 900;
-    letter-spacing: -0.5px;
+    display: flex;
+    align-items: center;
 }
 
-.logo i {
-    color: var(--secondary-color);
-    font-size: 1.4rem;
+.logo img {
+    height: 70px;
+    width: auto;
 }
 
 /* Search Bar in Nav */
@@ -180,6 +177,40 @@ nav {
 
 .nav-items a:hover {
     color: var(--accent-color);
+}
+
+.chat-btn-nav {
+    background: var(--primary-color);
+    color: white !important;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.2s;
+}
+
+.chat-btn-nav:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #e74c3c;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 0.75rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 2px solid white;
+    font-weight: bold;
 }
 
 /* Buttons */
@@ -409,6 +440,12 @@ nav {
     padding: 3rem;
     text-align: center;
     position: relative;
+}
+
+.login-logo {
+    max-width: 180px;
+    height: auto;
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.2));
 }
 
 .auth-content {

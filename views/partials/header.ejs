@@ -12,7 +12,9 @@
 <body>
     <nav>
         <div class="logo">
-            <a href="/home"><i class="fa-solid fa-feather-pointed"></i> myBlog</a>
+            <a href="/home">
+                <img src="/images/logo.png" alt="myBlog Logo">
+            </a>
         </div>
 
         <div class="nav-center">
@@ -25,8 +27,12 @@
         <div class="nav-items">
             <ul>
                 <% if(typeof user !=='undefined' && user) { %>
-                    <li><a href="/chat" title="Messages"><i class="fa-regular fa-paper-plane"
-                                style="font-size: 1.2rem;"></i></a></li>
+                    <li>
+                        <a href="/chat" title="Messages" class="chat-btn-nav" style="position: relative;">
+                            <i class="fa-regular fa-paper-plane" style="font-size: 1rem;"></i>
+                            <span id="chat-badge" class="badge" style="display: none;"></span>
+                        </a>
+                    </li>
                     <li>
                         <a href="/notifications" style="position: relative;">
                             <i class="fa-regular fa-bell" style="font-size: 1.2rem;"></i>
@@ -50,8 +56,30 @@
     </nav>
 
     <script>
-    // Poll for notifications
-    <% if (typeof user !== 'undefined' && user) { %>
+        // Check for notifications
+        <% if (typeof user !== 'undefined' && user) { %>
+            async function updateUnreadCount() {
+                try {
+                    const res = await fetch('/api/chat/unread-count');
+                    const data = await res.json();
+
+                    const chatBadge = document.getElementById('chat-badge');
+                    if (chatBadge) {
+                        if (data.count > 0) {
+                            chatBadge.innerText = data.count > 99 ? '99+' : data.count;
+                            chatBadge.style.display = 'flex';
+                        } else {
+                            chatBadge.style.display = 'none';
+                        }
+                    }
+                } catch (e) { console.error(e); }
+            }
+
+            // Initial check
+            updateUnreadCount();
+            setInterval(updateUnreadCount, 5000); // Poll every 5s for unread count
+
+            // Notification polling
             async function checkNotifications() {
                 try {
                     const res = await fetch('/api/notifications/unread');
@@ -63,7 +91,7 @@
                 } catch (e) { }
             }
             checkNotifications();
-            setInterval(checkNotifications, 30000); // Check every 30s
-    <% } %>
+            setInterval(checkNotifications, 60000);
+        <% } %>
     </script>
     <main>

@@ -22,6 +22,12 @@
                                         <%= contact.lastMessage.content.substring(0, 20) %>...
                                 </span>
                             </div>
+                            <% if (contact.unreadCount> 0) { %>
+                                <span class="sidebar-badge"
+                                    style="background: #e74c3c; color: white; border-radius: 50%; padding: 2px 6px; font-size: 0.7rem; margin-left: auto;">
+                                    <%= contact.unreadCount %>
+                                </span>
+                                <% } %>
                         </a>
                         <% }) %>
                             <% } else { %>
@@ -92,7 +98,6 @@
             display: grid;
             grid-template-columns: 300px 1fr;
             height: calc(100vh - 80px);
-            /* Adjust for header */
             max-width: 1200px;
             margin: 0 auto;
             background: white;
@@ -255,77 +260,172 @@
         }
     </style>
 
+    <script>
+        // Sidebar Polling Script
+        async function updateSidebar() {
+            try {
+                const res = await fetch('/api/chat/contacts');
+                if (!res.ok) return;
+                const data = await res.json();
+                const contactsList = document.querySelector('.contacts-list');
+
+                if (data.contacts.length === 0) {
+                    if (!contactsList.querySelector('p')) {
+                        contactsList.innerHTML = '<p style="padding: 1rem; color: var(--text-light); font-size: 0.9rem;">No conversations yet. Visit a profile to start chatting!</p>';
+                    }
+                    return;
+                }
+
+                const currentPath = window.location.pathname; // e.g., /chat/username
+
+                const html = data.contacts.map(contact => {
+                    const isActive = currentPath === `/chat/${contact.user.username}`;
+                    const lastMsgPrefix = contact.lastMessage.sender.username === '<%= user %>' ? 'You: ' : '';
+
+                    return `
+                        <a href="/chat/${contact.user.username}"
+                            class="contact-item ${isActive ? 'active' : ''}">
+                            <img src="/thumbnails/${contact.user.dp}" onerror="this.src='/images/user-icon.png'" alt="User">
+                            <div class="contact-info">
+                                <span class="contact-name">
+                                    ${contact.user.fullname || contact.user.username}
+                                </span>
+                                <span class="contact-preview">
+                                    ${lastMsgPrefix}${contact.lastMessage.content.substring(0, 20)}...
+                                </span>
+                            </div>
+                            ${contact.unreadCount > 0 ? `
+                                <span class="sidebar-badge"
+                                    style="background: #e74c3c; color: white; border-radius: 50%; padding: 2px 6px; font-size: 0.7rem; margin-left: auto;">
+                                    ${contact.unreadCount}
+                                </span>
+                            ` : ''}
+                        </a>
+                    `;
+                }).join('');
+
+                contactsList.innerHTML = html;
+            } catch (e) { console.error("Sidebar poll error:", e); }
+        }
+
+        setInterval(updateSidebar, 4000); // Check sidebar every 4 seconds
+    </script>
+
     <% if(activeChat) { %>
         <script>
-            const chatForm = document.getElementById('chatForm');
-            const msgInput = document.getElementById('msgInput');
-            const messagesArea = document.getElementById('messagesArea');
-            const recipientUsername = '<%= activeChat.username %>';
+            document.addEventListener('DOMContentLoaded', () => {
+                const chatForm = document.getElementById('chatForm');
+                const msgInput = document.getElementById('msgInput');
+                const messagesArea = document.getElementById('messagesArea');
+                const recipientUsername = '<%= activeChat.username %>';
+                let lastMessageId = '<%= messages.length > 0 ? messages[messages.length-1]._id : "" %>';
 
-            // Check for share link
-            const urlParams = new URLSearchParams(window.location.search);
-            const sharePath = urlParams.get('share');
-            if (sharePath) {
-                msgInput.value = "Check out this story: " + window.location.origin + sharePath;
-            }
+                // Check for share link
+                const urlParams = new URLSearchParams(window.location.search);
+                const sharePath = urlParams.get('share');
+                if (sharePath && msgInput) {
+                    msgInput.value = "Check out this story: " + window.location.origin + sharePath;
+                }
 
-            // Auto scroll to bottom
-            messagesArea.scrollTop = messagesArea.scrollHeight;
+                // Auto scroll to bottom
+                if (messagesArea) messagesArea.scrollTop = messagesArea.scrollHeight;
 
-            // Send Message
-            chatForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const content = msgInput.value;
-                if (!content) return;
-
-                try {
-                    const res = await fetch('/api/chat/send', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ recipientUsername, content })
-                    });
-                    const data = await res.json();
-
-                    if (data.status === 'sent') {
-                        appendMessage(data.message, 'sent');
-                        msgInput.value = '';
-                        messagesArea.scrollTop = messagesArea.scrollHeight;
-                    }
-                } catch (err) { console.error(err); }
-            });
-
-            function appendMessage(msg, type) {
-                const div = document.createElement('div');
-                div.className = `message-bubble ${type}`;
-                div.innerHTML = `${msg.content} <div class="msg-time">Just now</div>`;
-                messagesArea.appendChild(div);
-            }
-
-            // Polling
-            let lastMsgId = '<%= messages.length > 0 ? messages[messages.length-1]._id : "" %>';
-
-            async function pollMessages() {
-                try {
-                    const res = await fetch(`/api/chat/${recipientUsername}/poll?lastId=${lastMsgId}`);
-                    const data = await res.json();
-
-                    if (data.messages && data.messages.length > 0) {
-                        data.messages.forEach(msg => {
-                            // Only append if it's from the other person (sent ones are already appended locally)
-                            if (msg.sender !== '<%= currentUserDetails._id %>') {
-                                appendMessage(msg, 'received');
-                                lastMsgId = msg._id;
-                            } else {
-                                // If it's my message (from another tab?), update ID
-                                lastMsgId = msg._id;
-                            }
+                async function markAsRead(username) {
+                    try {
+                        await fetch('/api/chat/mark-read', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ senderUsername: username })
                         });
-                        if (data.messages.length > 0) messagesArea.scrollTop = messagesArea.scrollHeight;
-                    }
-                } catch (e) { }
-            }
 
-            setInterval(pollMessages, 3000);
+                        // Update header badge
+                        if (typeof updateUnreadCount === 'function') updateUnreadCount();
+
+                        // Update sidebar badge for this user (set to 0/remove)
+                        const contactItem = document.querySelector(`.contact-item[href="/chat/${username}"]`);
+                        if (contactItem) {
+                            const badge = contactItem.querySelector('.sidebar-badge');
+                            if (badge) badge.style.display = 'none';
+                        }
+                    } catch (e) { console.error("Error marking read:", e); }
+                }
+
+                markAsRead(recipientUsername);
+
+                function appendMessage(msg, type) {
+                    const div = document.createElement('div');
+                    div.className = `message-bubble ${type}`;
+                    div.innerHTML = `${msg.content} <div class="msg-time">${new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>`;
+                    messagesArea.appendChild(div);
+                }
+
+                // Send Message
+                if (chatForm) {
+                    chatForm.addEventListener('submit', async (e) => {
+                        e.preventDefault();
+                        const content = msgInput.value;
+                        if (!content) return;
+
+                        try {
+                            const res = await fetch('/api/chat/send', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ recipientUsername, content })
+                            });
+
+                            if (res.status === 401) {
+                                alert("Session expired. Redirecting to login.");
+                                window.location.href = '/';
+                                return;
+                            }
+
+                            if (!res.ok) {
+                                const data = await res.json().catch(() => ({}));
+                                alert(`Send failed: ${data.error || 'Server error'}`);
+                                return;
+                            }
+
+                            const data = await res.json();
+                            if (data.status === 'sent') {
+                                appendMessage(data.message, 'sent');
+                                msgInput.value = '';
+                                messagesArea.scrollTop = messagesArea.scrollHeight;
+                                lastMessageId = data.message._id; // Update last ID
+                            }
+                        } catch (err) {
+                            console.error('Network error:', err);
+                            alert('Network error. Check console.');
+                        }
+                    });
+                }
+
+                // Polling for new messages
+                async function fetchNewMessages() {
+                    try {
+                        let url = `/api/chat/${recipientUsername}/poll`;
+                        if (lastMessageId) url += `?lastId=${lastMessageId}`;
+
+                        const res = await fetch(url);
+                        if (!res.ok) return;
+
+                        const data = await res.json();
+                        if (data.messages && data.messages.length > 0) {
+                            data.messages.forEach(msg => {
+                                if (msg.sender.username === recipientUsername) {
+                                    appendMessage(msg, 'received');
+                                    lastMessageId = msg._id;
+
+                                    // Mark as read immediately
+                                    markAsRead(recipientUsername);
+                                }
+                            });
+                            messagesArea.scrollTop = messagesArea.scrollHeight;
+                        }
+                    } catch (e) { console.error(e); }
+                }
+
+                setInterval(fetchNewMessages, 3000); // Poll every 3 seconds
+            });
         </script>
         <% } %>
 
