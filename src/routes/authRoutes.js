@@ -45,8 +45,10 @@ router.post('/signup', async (req, res) => {
 // Login Logic
 router.post("/login", async (req, res) => {
     try {
-        const { username, password } = req.body;
-        const user = await User.findOne({ username });
+
+        console.log("Login Attempt Body:", req.body);
+        const { email, password } = req.body;
+        const user = await User.findOne({ email });
 
         if (!user) {
             return res.render("login", { error: "User not found" });
@@ -57,6 +59,7 @@ router.post("/login", async (req, res) => {
             return res.render("login", { error: "Invalid credentials" });
         }
 
+        req.session.user = user; // CRITICAL FIX: Middleware likely checks this
         req.session.username = user.username;
         req.session.type = user.type;
         req.session.useremail = user.email;

@@ -16,16 +16,10 @@ router.get('/home', ensureAuthenticated, async (req, res) => {
         const posts = await Blog.find({}).sort({ date: -1 }); // Recent first
         const sortedPosts = await Blog.find({}).sort({ like: -1 }); // Popular
 
-        // Fetch AI Trending Posts (Latest 3)
-        const trendingPosts = await Blog.find({ isAiGenerated: true })
-            .sort({ date: -1 })
-            .limit(3);
-
         res.render('home', {
             user: req.session.username,
             posts: posts,
             sposts: sortedPosts,
-            trendingPosts: trendingPosts,
             date: Date.now()
         });
     } catch (err) {
