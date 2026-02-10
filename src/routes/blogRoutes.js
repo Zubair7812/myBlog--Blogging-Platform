@@ -3,9 +3,9 @@ const router = express.Router();
 const Blog = require("../models/Blog");
 const User = require("../models/User");
 const Comment = require("../models/Comment");
+const Notification = require("../models/Notification");
 const multer = require("multer");
 const path = require("path");
-const auth = require("../middleware/auth"); // Assuming you can extract this if needed, or inline check
 
 // Multer Config
 const storage = multer.diskStorage({
@@ -23,17 +23,9 @@ const checkAuth = (req, res, next) => {
     if (req.session.username) {
         next();
     } else {
-        res.redirect("/");
+        res.status(401).json({ error: "Unauthorized" });
     }
 };
-
-// Compose Page
-router.get("/compose", checkAuth, (req, res) => {
-    res.render("compose", {
-        username: req.session.username,
-        userType: req.session.type
-    });
-});
 
 // Create Post
 router.post("/compose", checkAuth, upload.single("image"), async (req, res) => {
@@ -46,10 +38,10 @@ router.post("/compose", checkAuth, upload.single("image"), async (req, res) => {
             date: new Date()
         });
         await newPost.save();
-        res.redirect("/home");
+        res.status(201).json({ message: "Post created", post: newPost });
     } catch (err) {
         console.log(err);
-        res.redirect("/home");
+        res.status(500).json({ error: "Error creating post" });
     }
 });
 
@@ -57,9 +49,9 @@ router.post("/compose", checkAuth, upload.single("image"), async (req, res) => {
 router.get("/posts/:id", async (req, res) => {
     try {
         const post = await Blog.findById(req.params.id);
-        const comments = await Comment.find({ postId: req.params.id }).sort({ date: -1 }); // Get comments
+        const comments = await Comment.find({ postId: req.params.id }).sort({ date: -1 });
 
-        if (!post) return res.render("notfound");
+        if (!post) return res.status(404).json({ error: "Post not found" });
 
         const authorUser = await User.findOne({ username: post.author });
 
@@ -69,8 +61,8 @@ router.get("/posts/:id", async (req, res) => {
             currentUserId = currentUser ? currentUser._id : null;
         }
 
-        res.render("posts", {
-            posts: post,
+        res.json({
+            post: post,
             comments: comments,
             user: req.session.username,
             userType: req.session.type,
@@ -78,12 +70,9 @@ router.get("/posts/:id", async (req, res) => {
             currentUserId: currentUserId
         });
     } catch (err) {
-        res.redirect("/home");
+        res.status(500).json({ error: "Error fetching post" });
     }
 });
-
-const Notification = require("../models/Notification");
-// ... imports
 
 // Add Comment
 router.post("/posts/:id/comment", checkAuth, async (req, res) => {
@@ -109,10 +98,10 @@ router.post("/posts/:id/comment", checkAuth, async (req, res) => {
             });
         }
 
-        res.redirect("/posts/" + req.params.id);
+        res.status(201).json({ message: "Comment added", comment: newComment });
     } catch (err) {
         console.log(err);
-        res.redirect("/posts/" + req.params.id);
+        res.status(500).json({ error: "Error adding comment" });
     }
 });
 
@@ -152,18 +141,7 @@ router.post("/posts/:id/like", checkAuth, async (req, res) => {
     }
 });
 
-// Update Post Pages... (kept simple for brevity, logic exists in edit-post)
-router.get("/update/:id", checkAuth, async (req, res) => {
-    try {
-        const post = await Blog.findById(req.params.id);
-        if (post.author === req.session.username || req.session.type === 'admin') {
-            res.render("edit-post", { post: post, user: req.session.username });
-        } else {
-            res.redirect("/posts/" + req.params.id);
-        }
-    } catch (err) { res.redirect("/home"); }
-});
-
+// Update Post
 router.post("/update/:id", checkAuth, upload.single("image"), async (req, res) => {
     try {
         const updateData = {
@@ -173,21 +151,26 @@ router.post("/update/:id", checkAuth, upload.single("image"), async (req, res) =
         if (req.file) updateData.thumbnail = req.file.filename;
 
         await Blog.findByIdAndUpdate(req.params.id, updateData);
-        res.redirect("/posts/" + req.params.id);
-    } catch (err) { res.redirect("/home"); }
+        res.json({ message: "Post updated" });
+    } catch (err) {
+        res.status(500).json({ error: "Error updating post" });
+    }
 });
 
-router.get("/delete/:id", checkAuth, async (req, res) => {
+// Delete Post
+router.delete("/delete/:id", checkAuth, async (req, res) => {
     try {
         const post = await Blog.findById(req.params.id);
         if (post.author === req.session.username || req.session.type === 'admin') {
             await Blog.findByIdAndDelete(req.params.id);
-            await Comment.deleteMany({ postId: req.params.id }); // Delete associated comments
-            res.redirect("/home");
+            await Comment.deleteMany({ postId: req.params.id });
+            res.json({ message: "Post deleted" });
         } else {
-            res.redirect("/home");
+            res.status(403).json({ error: "Unauthorized" });
         }
-    } catch (err) { res.redirect("/home"); }
+    } catch (err) {
+        res.status(500).json({ error: "Error deleting post" });
+    }
 });
 
 module.exports = router;

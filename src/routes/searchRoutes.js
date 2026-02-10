@@ -8,7 +8,7 @@ router.get("/search", async (req, res) => {
     const query = req.query.q;
     const filter = req.query.filter || 'all'; // 'all', 'posts', 'people'
 
-    if (!query) return res.redirect("/home");
+    if (!query) return res.status(400).json({ error: "No query provided" });
 
     try {
         let posts = [];
@@ -26,7 +26,7 @@ router.get("/search", async (req, res) => {
             });
         }
 
-        res.render("search", {
+        res.json({
             query: query,
             posts: posts,
             users: users,
@@ -37,7 +37,7 @@ router.get("/search", async (req, res) => {
 
     } catch (err) {
         console.log(err);
-        res.redirect("/home");
+        res.status(500).json({ error: "Error searching" });
     }
 });
 

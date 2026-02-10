@@ -1,0 +1,109 @@
+.home-container-vibrant {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 3rem;
+    padding-top: 3rem;
+}
+
+.section-title {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--primary-color);
+    margin-bottom: 2rem;
+    position: relative;
+    display: inline-block;
+}
+
+.section-title::after {
+    content: '';
+    display: block;
+    width: 60px;
+    height: 4px;
+    background-color: var(--primary-color);
+    margin-top: 5px;
+    border-radius: 2px;
+}
+
+.vibrant-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.author-tag a {
+    color: var(--secondary-color);
+    font-weight: 600;
+}
+
+/* Sidebar Styling */
+.end-sidebar {
+    position: sticky;
+    top: 6rem;
+    height: fit-content;
+}
+
+.sidebar-card {
+    background: white;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+.sidebar-card h3 {
+    color: var(--text-color);
+    border-bottom: 2px solid #ecf0f1;
+    padding-bottom: 1rem;
+    margin-bottom: 1.5rem;
+    font-size: 1.2rem;
+}
+
+.trending-list-vibrant {
+    list-style: none;
+    padding: 0;
+}
+
+.trending-item-vibrant {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    align-items: flex-start;
+}
+
+.trend-number {
+    font-size: 1.5rem;
+    color: rgba(26, 188, 156, 0.3);
+    font-weight: 900;
+    line-height: 1;
+}
+
+.trend-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.trend-info a {
+    font-weight: 600;
+    color: var(--text-color);
+    line-height: 1.3;
+    margin-bottom: 0.25rem;
+    transition: color 0.2s;
+}
+
+.trend-info a:hover {
+    color: var(--primary-color);
+}
+
+.trend-likes {
+    font-size: 0.8rem;
+    color: #95a5a6;
+}
+
+@media (max-width: 900px) {
+    .home-container-vibrant {
+        grid-template-columns: 1fr;
+    }
+
+    .end-sidebar {
+        display: none;
+    }
+}

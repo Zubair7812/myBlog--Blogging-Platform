@@ -6,10 +6,10 @@ const User = require("../models/User");
 // Middleware
 const checkAuth = (req, res, next) => {
     if (req.session.username) next();
-    else res.redirect("/");
+    else res.status(401).json({ error: "Unauthorized" });
 };
 
-// Get Notifications (API or View)
+// Get Notifications
 router.get("/notifications", checkAuth, async (req, res) => {
     try {
         const currentUser = await User.findOne({ username: req.session.username });
@@ -18,18 +18,17 @@ router.get("/notifications", checkAuth, async (req, res) => {
             .populate('postId', 'title')
             .sort({ createdAt: -1 });
 
-        // Mark as read (optional logic: mark when viewed)
-        // Mark as read (optional logic: mark when viewed)
+        // Mark as read
         await Notification.updateMany({ recipient: currentUser._id, read: false }, { $set: { read: true } });
 
-        res.render("notifications", {
+        res.json({
             notifications,
             user: req.session.username,
             userType: req.session.type
         });
     } catch (err) {
         console.log(err);
-        res.redirect("/home");
+        res.status(500).json({ error: "Error fetching notifications" });
     }
 });
 

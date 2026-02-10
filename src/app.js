@@ -5,16 +5,19 @@ const connectDB = require("./db");
 const path = require("path");
 const sessions = require("express-session");
 const { MongoStore } = require('connect-mongo');
+const cors = require("cors");
 const app = express();
 
 // Connect to Database
 connectDB();
 
 // Middleware
+app.use(cors()); // Enable CORS for all routes
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static("public"));
-app.set("view engine", "ejs");
+// // EJS setup removed
+// app.set("view engine", "ejs"); // Removed for React migration
 
 // Session Setup
 const sessionMiddleware = sessions({
@@ -24,7 +27,11 @@ const sessionMiddleware = sessions({
   store: MongoStore.create({
     mongoUrl: process.env.MONGO_URL || 'mongodb://127.0.0.1:27017/myBlog'
   }),
-  cookie: { maxAge: 1000 * 60 * 60 * 24 } // 1 day
+  cookie: {
+    maxAge: 1000 * 60 * 60 * 24, // 1 day
+    httpOnly: true,
+    secure: false // Set to true if using https
+  }
 });
 
 app.use(sessionMiddleware);
@@ -37,8 +44,8 @@ app.use((req, res, next) => {
 });
 
 // Routes
-app.use('/', require('./routes/indexRoutes'));
-app.use('/', require('./routes/authRoutes'));
+app.use('/api', require('./routes/indexRoutes'));
+app.use('/api', require('./routes/authRoutes'));
 
 const blogRoutes = require("./routes/blogRoutes");
 const userRoutes = require("./routes/userRoutes");
@@ -46,15 +53,15 @@ const searchRoutes = require("./routes/searchRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
 const chatRoutes = require("./routes/chatRoutes");
 
-app.use(blogRoutes);
-app.use(userRoutes);
-app.use(searchRoutes);
-app.use(notificationRoutes);
-app.use(chatRoutes);
+app.use('/api', blogRoutes);
+app.use('/api', userRoutes);
+app.use('/api', searchRoutes);
+app.use('/api', notificationRoutes);
+app.use('/api', chatRoutes);
 
 // 404 Handler
 app.use((req, res) => {
-  res.status(404).render("notfound");
+  res.status(404).json({ error: "Not Found" });
 });
 
 const PORT = process.env.PORT || 3000;

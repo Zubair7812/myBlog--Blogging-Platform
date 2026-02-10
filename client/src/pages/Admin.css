@@ -1,0 +1,80 @@
+.admin-container {
+    margin-top: 2rem;
+}
+
+.stats-grid {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+    margin-bottom: 3rem;
+}
+
+.stat-card {
+    flex: 1;
+    min-width: 250px;
+    padding: 2rem;
+    border-radius: 8px;
+    text-align: center;
+    color: white;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.stat-card.primary {
+    background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+}
+
+.stat-card.secondary {
+    background: linear-gradient(135deg, #e17055, #fab1a0);
+}
+
+.stat-card h2 {
+    margin: 0;
+    font-size: 1.2rem;
+    opacity: 0.9;
+}
+
+.stat-card p {
+    font-size: 3rem;
+    font-weight: bold;
+    margin: 0.5rem 0 0;
+}
+
+.users-grid-admin {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.5rem;
+}
+
+.user-card-admin {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    text-align: center;
+}
+
+.user-card-admin img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 1rem;
+}
+
+.user-card-admin h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.1rem;
+    color: #333;
+}
+
+.user-card-admin p {
+    color: #777;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    word-break: break-all;
+}
+
+.btn-sm {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+}

@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const User = require("../models/User");
 const Blog = require("../models/Blog");
+const Notification = require("../models/Notification");
 const multer = require("multer");
 const path = require("path");
 
@@ -10,7 +11,7 @@ const checkAuth = (req, res, next) => {
     if (req.session.username) {
         next();
     } else {
-        res.redirect("/");
+        res.status(401).json({ error: "Unauthorized" });
     }
 };
 
@@ -25,7 +26,7 @@ const upload = multer({ storage: storage });
 router.get("/profile/:username", async (req, res) => {
     try {
         const user = await User.findOne({ username: req.params.username });
-        if (!user) return res.render("notfound");
+        if (!user) return res.status(404).json({ error: "User not found" });
 
         const posts = await Blog.find({ author: user.username }).sort({ date: -1 });
 
@@ -36,8 +37,8 @@ router.get("/profile/:username", async (req, res) => {
             currentUserId = currentUser ? currentUser._id : null;
         }
 
-        res.render("profile", {
-            item: user.username, // Legacy support
+        res.json({
+            // item: user.username, // Legacy support, no longer needed in API
             username: req.session.username, // Logged in user's username
             userdata: user, // Profile owner's data
             posts: posts,
@@ -46,17 +47,11 @@ router.get("/profile/:username", async (req, res) => {
         });
     } catch (err) {
         console.log(err);
-        res.redirect("/home");
+        res.status(500).json({ error: "Error fetching profile" });
     }
 });
 
 // Edit Profile Routes
-router.get("/editprofile/:username", checkAuth, async (req, res) => {
-    if (req.session.username !== req.params.username) return res.redirect("/profile/" + req.params.username);
-    const user = await User.findOne({ username: req.params.username });
-    res.render("edit-profile", { username: req.session.username, userdata: user });
-});
-
 router.post("/editprofile/:username", checkAuth, upload.single("image"), async (req, res) => {
     try {
         const updateData = {
@@ -69,13 +64,11 @@ router.post("/editprofile/:username", checkAuth, upload.single("image"), async (
         if (req.file) updateData.dp = req.file.filename;
 
         await User.findOneAndUpdate({ username: req.session.username }, updateData);
-        res.redirect("/profile/" + req.session.username);
-    } catch (err) { res.redirect("/home"); }
+        res.json({ message: "Profile updated" });
+    } catch (err) {
+        res.status(500).json({ error: "Error updating profile" });
+    }
 });
-
-const Notification = require("../models/Notification");
-
-// ... (existing imports)
 
 // Follow User
 router.post("/follow/:id", checkAuth, async (req, res) => {
@@ -83,7 +76,7 @@ router.post("/follow/:id", checkAuth, async (req, res) => {
         const targetUser = await User.findById(req.params.id);
         const currentUser = await User.findOne({ username: req.session.username });
 
-        if (!targetUser || !currentUser) return res.json({ status: 'error' });
+        if (!targetUser || !currentUser) return res.status(400).json({ status: 'error' });
 
         // Add to following
         if (!currentUser.following.includes(targetUser._id)) {
@@ -119,7 +112,7 @@ router.post("/unfollow/:id", checkAuth, async (req, res) => {
         const targetUser = await User.findById(req.params.id);
         const currentUser = await User.findOne({ username: req.session.username });
 
-        if (!targetUser || !currentUser) return res.json({ status: 'error' });
+        if (!targetUser || !currentUser) return res.status(400).json({ status: 'error' });
 
         // Remove from following
         currentUser.following = currentUser.following.filter(id => !id.equals(targetUser._id));
@@ -136,15 +129,34 @@ router.post("/unfollow/:id", checkAuth, async (req, res) => {
     }
 });
 
+// Admin Dashboard Data
+router.get("/admin", checkAuth, async (req, res) => {
+    if (req.session.type === 'admin') {
+        try {
+            const profiles = await User.find({});
+            const posts = await Blog.find({});
+            res.json({ profiles, posts });
+        } catch (err) {
+            res.status(500).json({ error: "Error fetching admin data" });
+        }
+    } else {
+        res.status(403).json({ error: "Unauthorized" });
+    }
+});
+
 // Remove User (Admin)
-router.get("/removeuser/:id", checkAuth, async (req, res) => {
+router.delete("/removeuser/:id", checkAuth, async (req, res) => {
     if (req.session.type === 'admin') {
         const user = await User.findById(req.params.id);
-        await Blog.deleteMany({ author: user.username });
-        await User.findByIdAndDelete(req.params.id);
-        res.redirect("/admin");
+        if (user) {
+            await Blog.deleteMany({ author: user.username });
+            await User.findByIdAndDelete(req.params.id);
+            res.json({ message: "User removed" });
+        } else {
+            res.status(404).json({ error: "User not found" });
+        }
     } else {
-        res.redirect("/home");
+        res.status(403).json({ error: "Unauthorized" });
     }
 });
 

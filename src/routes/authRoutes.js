@@ -11,7 +11,7 @@ router.post('/signup', async (req, res) => {
         // Check if user exists
         const userExists = await User.findOne({ $or: [{ email }, { username: name }] });
         if (userExists) {
-            return res.send("<script>alert('User already exists');window.location.href = '/'</script>");
+            return res.status(400).json({ error: 'User already exists' });
         }
 
         // Hash password
@@ -29,60 +29,63 @@ router.post('/signup', async (req, res) => {
         await newUser.save();
 
         // Auto-login
-        req.session.user = newUser; // Store entire user object or just ID
-        req.session.username = newUser.username; // Maintain backward compatibility for now
+        req.session.user = newUser;
+        req.session.username = newUser.username;
         req.session.type = newUser.type;
         req.session.useremail = newUser.email;
 
-        res.redirect('/home');
+        res.status(201).json({ message: 'User created and logged in', user: newUser });
 
     } catch (err) {
         console.error(err);
-        res.status(500).send("Server Error");
+        res.status(500).json({ error: "Server Error" });
     }
 });
 
 // Login Logic
 router.post("/login", async (req, res) => {
     try {
-
-        console.log("Login Attempt Body:", req.body);
         const { email, password } = req.body;
         const user = await User.findOne({ email });
 
         if (!user) {
-            return res.render("login", { error: "User not found" });
+            return res.status(400).json({ error: "User not found" });
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
-            return res.render("login", { error: "Invalid credentials" });
+            return res.status(400).json({ error: "Invalid credentials" });
         }
 
-        req.session.user = user; // CRITICAL FIX: Middleware likely checks this
+        req.session.user = user;
         req.session.username = user.username;
         req.session.type = user.type;
         req.session.useremail = user.email;
 
-        if (user.type === 'admin') {
-            res.redirect('admin');
-        } else {
-            // Update visits logic moved to middleware or specific route if needed
-            res.redirect('home');
-        }
+        res.json({ message: 'Logged in successfully', user: user });
 
     } catch (err) {
         console.error(err);
-        res.send("<script>alert('Error logging in');window.location.href = '/'</script>");
+        res.status(500).json({ error: "Server Error" });
     }
 });
 
 // --- Logout ---
-router.get('/logout', (req, res) => {
+router.post('/logout', (req, res) => {
     req.session.destroy((err) => {
-        if (err) console.log(err);
-        res.redirect('/');
+        if (err) return res.status(500).json({ error: 'Could not log out' });
+        res.clearCookie('connect.sid');
+        res.json({ message: 'Logged out successfully' });
     });
+});
+
+// Check Auth Status
+router.get('/check-auth', (req, res) => {
+    if (req.session.user) {
+        res.json({ isAuthenticated: true, user: req.session.user });
+    } else {
+        res.json({ isAuthenticated: false });
+    }
 });
 
 module.exports = router;
