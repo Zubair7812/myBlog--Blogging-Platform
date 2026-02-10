@@ -21,7 +21,13 @@ const Chat = () => {
         const fetchContacts = async () => {
             try {
                 const res = await axios.get('/api/chat/contacts');
-                setContacts(res.data.contacts);
+                // Ensure the currently active chat always shows 0 unread
+                const updatedContacts = res.data.contacts.map(c =>
+                    c.user.username === username
+                        ? { ...c, unreadCount: 0 }
+                        : c
+                );
+                setContacts(updatedContacts);
                 setError('');
             } catch (err) {
                 console.error(err);
@@ -31,7 +37,7 @@ const Chat = () => {
         fetchContacts();
         const interval = setInterval(fetchContacts, 5000); // Poll contacts
         return () => clearInterval(interval);
-    }, []);
+    }, [username]); // Re-run when username changes
 
     // Fetch Active Chat
     useEffect(() => {
@@ -46,6 +52,13 @@ const Chat = () => {
                     setActiveChatUser(res.data.activeChat);
                     setMessages(res.data.messages);
                     setError('');
+
+                    // Optimistic update: Clear unread count locally
+                    setContacts(prev => prev.map(c =>
+                        c.user.username === username
+                            ? { ...c, unreadCount: 0 }
+                            : c
+                    ));
                 } else {
                     setError("Active chat user not found in response");
                 }
@@ -144,15 +157,35 @@ const Chat = () => {
                                     <p>No messages yet. Say hi!</p>
                                 </div>
                             ) : (
-                                messages.map(msg => (
-                                    <div
-                                        key={msg._id}
-                                        className={`message-bubble ${msg.sender._id === activeChatUser._id ? 'received' : 'sent'}`}
-                                    >
-                                        <p>{msg.content}</p>
-                                        <small>{new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</small>
-                                    </div>
-                                ))
+                                messages.map((msg, index) => {
+                                    const currentDate = new Date(msg.createdAt).toDateString();
+                                    const prevDate = index > 0 ? new Date(messages[index - 1].createdAt).toDateString() : null;
+                                    const showDate = currentDate !== prevDate;
+
+                                    let dateLabel = new Date(msg.createdAt).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+                                    const today = new Date().toDateString();
+                                    const yesterday = new Date();
+                                    yesterday.setDate(yesterday.getDate() - 1);
+
+                                    if (currentDate === today) dateLabel = 'Today';
+                                    else if (currentDate === yesterday.toDateString()) dateLabel = 'Yesterday';
+
+                                    return (
+                                        <div key={msg._id} style={{ display: 'flex', flexDirection: 'column' }}>
+                                            {showDate && (
+                                                <div className="date-separator">
+                                                    <span>{dateLabel}</span>
+                                                </div>
+                                            )}
+                                            <div
+                                                className={`message-bubble ${msg.sender?._id?.toString() === activeChatUser?._id?.toString() ? 'received' : 'sent'}`}
+                                            >
+                                                <p>{msg.content}</p>
+                                                <small>{new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</small>
+                                            </div>
+                                        </div>
+                                    );
+                                })
                             )}
                         </div>
                         <form className="chat-input-area" onSubmit={handleSendMessage}>

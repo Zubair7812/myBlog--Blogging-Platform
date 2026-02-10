@@ -142,7 +142,7 @@ router.get("/chat/:username", checkAuth, async (req, res) => {
                 { sender: currentUser._id, recipient: targetUser._id },
                 { sender: targetUser._id, recipient: currentUser._id }
             ]
-        }).sort({ createdAt: 1 });
+        }).sort({ createdAt: 1 }).populate('sender recipient', 'username dp fullname');
 
         res.json({
             user: req.session.username,
