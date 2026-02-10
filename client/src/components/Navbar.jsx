@@ -23,7 +23,16 @@ const Navbar = () => {
                             <li><Link to="/notifications">Notifications</Link></li>
                             <li><Link to="/chat">Chat</Link></li>
                             <li><Link to="/compose" className="btn btn-primary">Compose</Link></li>
-                            <li><Link to={`/profile/${user.username}`}>{user.username}</Link></li>
+                            <li>
+                                <Link to={`/profile/${user.username}`} className="nav-profile-link">
+                                    <img
+                                        src={user.dp ? `/thumbnails/${user.dp}` : '/thumbnails/default-user.jpg'}
+                                        alt={user.username}
+                                        className="nav-profile-img"
+                                        onError={(e) => { e.target.src = 'https://via.placeholder.com/40' }}
+                                    />
+                                </Link>
+                            </li>
                             <li><button onClick={handleLogout} className="btn btn-logout">Logout</button></li>
                         </>
                     ) : (
