@@ -3,27 +3,26 @@ const router = express.Router();
 const Message = require("../models/Message");
 const User = require("../models/User");
 
-// Middleware for Views
+// Middleware for APIs
 const checkAuth = (req, res, next) => {
     if (req.session.username) next();
-    else res.redirect("/");
+    else res.status(401).json({ error: "Unauthorized" });
 };
 
-// Middleware for APIs
-const checkAuthApi = (req, res, next) => {
-    if (req.session.username) next();
-    else res.status(401).json({ error: "Unauthorized. Please login again." });
-};
+// --- Static Routes (Must come before dynamic :username) ---
 
-// Chat Dashboard (Recent Conversations)
-router.get("/chat", checkAuth, async (req, res) => {
+// API: Get Contacts (Sidebar Polling)
+router.get("/chat/contacts", checkAuth, async (req, res) => {
     try {
         const currentUser = await User.findOne({ username: req.session.username });
+        console.log(`Fetching contacts for: ${req.session.username}, ID: ${currentUser?._id}`);
 
         // Find distinct users who have chatted with current user
         const messages = await Message.find({
             $or: [{ sender: currentUser._id }, { recipient: currentUser._id }]
         }).sort({ createdAt: -1 }).populate('sender recipient', 'username dp fullname');
+
+        console.log(`Found ${messages.length} messages for user.`);
 
         // Calculate unread counts per sender
         const unreadStats = await Message.aggregate([
@@ -34,7 +33,13 @@ router.get("/chat", checkAuth, async (req, res) => {
 
         const contactsMap = new Map();
         messages.forEach(msg => {
+            if (!msg.sender || !msg.recipient) return; // Skip if user deleted
+
             const partner = msg.sender._id.equals(currentUser._id) ? msg.recipient : msg.sender;
+
+            // Debug log
+            // console.log(`Processing msg: ${msg._id}, Partner: ${partner.username}`);
+
             if (!contactsMap.has(partner.username)) {
                 contactsMap.set(partner.username, {
                     user: partner,
@@ -45,76 +50,31 @@ router.get("/chat", checkAuth, async (req, res) => {
         });
 
         const contacts = Array.from(contactsMap.values());
+        console.log(`Returning ${contacts.length} contacts.`);
 
-        res.render("chat", {
-            user: req.session.username,
-            userType: req.session.type,
-            activeChat: null,
-            contacts: contacts
-        });
+        res.json({ contacts });
     } catch (err) {
-        console.log(err);
-        res.redirect("/home");
+        console.error("Error in /api/chat/contacts:", err);
+        res.status(500).json({ contacts: [] });
     }
 });
 
-// Specific Chat
-router.get("/chat/:username", checkAuth, async (req, res) => {
+// API: Get Global Unread Count
+router.get("/chat/unread-count", checkAuth, async (req, res) => {
     try {
         const currentUser = await User.findOne({ username: req.session.username });
-        const targetUser = await User.findOne({ username: req.params.username });
-
-        if (!targetUser) return res.redirect("/chat");
-
-        // Same Logic for contacts list
-        const messagesAll = await Message.find({
-            $or: [{ sender: currentUser._id }, { recipient: currentUser._id }]
-        }).sort({ createdAt: -1 }).populate('sender recipient', 'username dp fullname');
-
-        // Calculate unread counts per sender
-        const unreadStats = await Message.aggregate([
-            { $match: { recipient: currentUser._id, read: false } },
-            { $group: { _id: "$sender", count: { $sum: 1 } } }
-        ]);
-        const unreadMap = new Map(unreadStats.map(s => [s._id.toString(), s.count]));
-
-        const contactsMap = new Map();
-        messagesAll.forEach(msg => {
-            const partner = msg.sender._id.equals(currentUser._id) ? msg.recipient : msg.sender;
-            if (!contactsMap.has(partner.username)) {
-                contactsMap.set(partner.username, {
-                    user: partner,
-                    lastMessage: msg,
-                    unreadCount: unreadMap.get(partner._id.toString()) || 0
-                });
-            }
+        const count = await Message.countDocuments({
+            recipient: currentUser._id,
+            read: false
         });
-        const contacts = Array.from(contactsMap.values());
-
-        // Get messages for this specific chat
-        const chatMessages = await Message.find({
-            $or: [
-                { sender: currentUser._id, recipient: targetUser._id },
-                { sender: targetUser._id, recipient: currentUser._id }
-            ]
-        }).sort({ createdAt: 1 });
-
-        res.render("chat", {
-            user: req.session.username,
-            userType: req.session.type,
-            activeChat: targetUser,
-            messages: chatMessages,
-            contacts: contacts,
-            currentUserDetails: currentUser
-        });
+        res.json({ count });
     } catch (err) {
-        console.log(err);
-        res.redirect("/chat");
+        res.status(500).json({ count: 0 });
     }
 });
 
 // API: Send Message
-router.post("/api/chat/send", checkAuthApi, async (req, res) => {
+router.post("/chat/send", checkAuth, async (req, res) => {
     try {
         const { recipientUsername, content, type, metadata } = req.body;
         const currentUser = await User.findOne({ username: req.session.username });
@@ -140,8 +100,65 @@ router.post("/api/chat/send", checkAuthApi, async (req, res) => {
     }
 });
 
+// API: Mark messages as read
+router.post("/chat/mark-read", checkAuth, async (req, res) => {
+    try {
+        const { senderUsername } = req.body;
+        const currentUser = await User.findOne({ username: req.session.username });
+        const sender = await User.findOne({ username: senderUsername });
+
+        if (sender) {
+            await Message.updateMany(
+                { sender: sender._id, recipient: currentUser._id, read: false },
+                { $set: { read: true } }
+            );
+        }
+        res.json({ status: 'ok' });
+    } catch (err) {
+        res.status(500).json({ error: "Failed" });
+    }
+});
+
+// Chat Dashboard (Recent Conversations) - Redundant with contacts, but kept for legacy if needed
+// router.get("/chat", ... ) -> This is likely not used by React implementation, skipping or keeping simple.
+router.get("/chat", checkAuth, (req, res) => {
+    res.json({ message: "Use /chat/contacts for dashboard data" });
+});
+
+
+// --- Dynamic Routes (Must come last) ---
+
+// Specific Chat
+router.get("/chat/:username", checkAuth, async (req, res) => {
+    try {
+        const currentUser = await User.findOne({ username: req.session.username });
+        const targetUser = await User.findOne({ username: req.params.username });
+
+        if (!targetUser) return res.status(404).json({ error: "User not found" });
+
+        // Messages for this specific chat
+        const chatMessages = await Message.find({
+            $or: [
+                { sender: currentUser._id, recipient: targetUser._id },
+                { sender: targetUser._id, recipient: currentUser._id }
+            ]
+        }).sort({ createdAt: 1 });
+
+        res.json({
+            user: req.session.username,
+            userType: req.session.type,
+            activeChat: targetUser,
+            messages: chatMessages,
+            currentUserDetails: currentUser
+        });
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ error: "Error fetching chat" });
+    }
+});
+
 // API: Get New Messages (Polling)
-router.get("/api/chat/:username/poll", checkAuthApi, async (req, res) => {
+router.get("/chat/:username/poll", checkAuth, async (req, res) => {
     try {
         const lastId = req.query.lastId; // Pass last received message ID
         const currentUser = await User.findOne({ username: req.session.username });
@@ -162,76 +179,6 @@ router.get("/api/chat/:username/poll", checkAuthApi, async (req, res) => {
         res.json({ messages: newMessages });
 
     } catch (err) { res.json({ messages: [] }); }
-});
-
-// API: Get Global Unread Count
-router.get("/api/chat/unread-count", checkAuthApi, async (req, res) => {
-    try {
-        const currentUser = await User.findOne({ username: req.session.username });
-        const count = await Message.countDocuments({
-            recipient: currentUser._id,
-            read: false
-        });
-        res.json({ count });
-    } catch (err) {
-        res.status(500).json({ count: 0 });
-    }
-});
-
-// API: Mark messages as read
-router.post("/api/chat/mark-read", checkAuthApi, async (req, res) => {
-    try {
-        const { senderUsername } = req.body;
-        const currentUser = await User.findOne({ username: req.session.username });
-        const sender = await User.findOne({ username: senderUsername });
-
-        if (sender) {
-            await Message.updateMany(
-                { sender: sender._id, recipient: currentUser._id, read: false },
-                { $set: { read: true } }
-            );
-        }
-        res.json({ status: 'ok' });
-    } catch (err) {
-        res.status(500).json({ error: "Failed" });
-    }
-});
-
-// API: Get Contacts (Sidebar Polling)
-router.get("/api/chat/contacts", checkAuthApi, async (req, res) => {
-    try {
-        const currentUser = await User.findOne({ username: req.session.username });
-
-        // Find distinct users who have chatted with current user
-        const messages = await Message.find({
-            $or: [{ sender: currentUser._id }, { recipient: currentUser._id }]
-        }).sort({ createdAt: -1 }).populate('sender recipient', 'username dp fullname');
-
-        // Calculate unread counts per sender
-        const unreadStats = await Message.aggregate([
-            { $match: { recipient: currentUser._id, read: false } },
-            { $group: { _id: "$sender", count: { $sum: 1 } } }
-        ]);
-        const unreadMap = new Map(unreadStats.map(s => [s._id.toString(), s.count]));
-
-        const contactsMap = new Map();
-        messages.forEach(msg => {
-            const partner = msg.sender._id.equals(currentUser._id) ? msg.recipient : msg.sender;
-            if (!contactsMap.has(partner.username)) {
-                contactsMap.set(partner.username, {
-                    user: partner,
-                    lastMessage: msg,
-                    unreadCount: unreadMap.get(partner._id.toString()) || 0
-                });
-            }
-        });
-
-        const contacts = Array.from(contactsMap.values());
-        res.json({ contacts });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ contacts: [] });
-    }
 });
 
 module.exports = router;
