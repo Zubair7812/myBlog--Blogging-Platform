@@ -60,7 +60,7 @@ router.get("/posts", async (req, res) => {
 });
 
 // View Post
-router.get("/posts/:id", async (req, res) => {
+router.get("/posts/:id", protect, async (req, res) => {
     try {
         const post = await Blog.findById(req.params.id);
         const comments = await Comment.find({ postId: req.params.id }).sort({ date: -1 });

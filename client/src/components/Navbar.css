@@ -19,12 +19,21 @@
 }
 
 .logo {
-    font-size: 1.8rem;
-    font-weight: 800;
-    color: var(--text-inverse);
+    display: flex;
+    align-items: center;
     background: none;
-    -webkit-text-fill-color: initial;
-    letter-spacing: -0.5px;
+    padding: 0;
+}
+
+.logo:hover {
+    opacity: 0.8;
+}
+
+.logo-img {
+    height: 40px;
+    /* Adjust based on desired size */
+    width: auto;
+    display: block;
 }
 
 .nav-links {
@@ -75,13 +84,29 @@
 }
 
 .nav-links .btn-primary:hover {
-    background: var(--secondary-muted);
+    background: #e5e5e5;
+    /* Slight dimming */
     box-shadow: none;
 }
 
 .nav-links .btn-primary:hover::after {
     width: 0;
     /* No underline for buttons */
+}
+
+.btn-logout {
+    background: var(--text-inverse);
+    color: var(--primary-color) !important;
+    padding: 0.5rem 1.5rem;
+    border-radius: var(--radius);
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-logout:hover {
+    background: #e5e5e5;
+    /* Slight dimming */
 }
 
 .nav-profile-link {

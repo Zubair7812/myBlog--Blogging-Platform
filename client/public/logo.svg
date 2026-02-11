@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60" fill="none">
+  <!-- Group for alignment -->
+  <g transform="translate(10, 10)">
+    <!-- Icon: Two overlapping rounded squares -->
+    <!-- First square (back) -->
+    <rect x="0" y="5" width="25" height="30" rx="4" stroke="white" stroke-width="3" fill="none" opacity="0.8"/>
+    <!-- Second square (front, slightly offset) -->
+    <rect x="10" y="0" width="25" height="30" rx="4" stroke="white" stroke-width="3" fill="#0A0A0A"/>
+    
+    <!-- Text: myBlog -->
+    <text x="50" y="28" fill="white" font-family="'Inter', sans-serif" font-weight="bold" font-size="28" letter-spacing="-1">myBlog</text>
+  </g>
+</svg>

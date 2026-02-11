@@ -95,9 +95,9 @@ const Profile = () => {
                         </div>
 
                         <div className="social-links-sidebar">
-                            <a href={profileData.facebook || '#'} className="social-icon"><i className="fab fa-facebook-f"></i> FB</a>
-                            <a href={profileData.instagram || '#'} className="social-icon"><i className="fab fa-instagram"></i> IG</a>
-                            <a href={profileData.twitter || '#'} className="social-icon"><i className="fab fa-twitter"></i> TW</a>
+                            <a href={profileData.facebook || '#'} className="social-icon"><i className="fa-brands fa-facebook-f"></i></a>
+                            <a href={profileData.twitter || '#'} className="social-icon"><i className="fa-brands fa-x-twitter"></i></a>
+                            <a href={profileData.instagram || '#'} className="social-icon"><i className="fa-brands fa-instagram"></i></a>
                         </div>
                     </div>
 

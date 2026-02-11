@@ -104,11 +104,16 @@
 
 .social-icon {
     color: white;
-    font-size: 0.9rem;
+    font-size: 1.2rem;
     background: rgba(255, 255, 255, 0.1);
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
-    transition: background 0.3s;
+    width: 45px;
+    height: 45px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    text-decoration: none;
 }
 
 .social-icon:hover {
@@ -133,9 +138,9 @@
 }
 
 .btn-edit-profile:hover {
-    background-color: var(--primary-dark);
+    background-color: #333333;
     color: white;
-    box-shadow: 0 0 15px var(--primary-color);
+    box-shadow: 0 0 15px var(--primary-muted);
 }
 
 
@@ -242,7 +247,8 @@
 }
 
 .btn-readmore:hover {
-    background-color: var(--primary-dark);
+    background-color: #333333;
+    color: white !important;
 }
 
 @media (max-width: 900px) {
