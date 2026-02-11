@@ -23,9 +23,9 @@
 }
 
 .notification-item {
-    background: white;
+    background: var(--card-bg);
     padding: 1.25rem;
-    border-radius: 0.75rem;
+    border-radius: var(--radius);
     border: 1px solid var(--border-color);
     box-shadow: var(--shadow-sm);
     display: flex;
@@ -39,13 +39,12 @@
 .notification-item:hover {
     transform: translateY(-2px);
     box-shadow: var(--shadow-md);
-    border-color: #cbd5e1;
+    border-color: var(--primary-color);
 }
 
 .notification-item.unread {
-    background-color: #f0fdf4;
-    /* Light green background for unread */
-    border-left: 4px solid var(--success-color);
+    background-color: var(--bg-alt);
+    border-left: 4px solid var(--primary-color);
 }
 
 .notification-avatar {
@@ -71,14 +70,14 @@
 
 .notification-date {
     font-size: 0.8rem;
-    color: var(--text-light);
+    color: var(--text-muted);
 }
 
 .empty-state {
     text-align: center;
     padding: 3rem;
-    color: var(--text-light);
-    background: #f8fafc;
-    border-radius: 1rem;
+    color: var(--text-muted);
+    background: var(--bg-alt);
+    border-radius: var(--radius);
     border: 2px dashed var(--border-color);
 }

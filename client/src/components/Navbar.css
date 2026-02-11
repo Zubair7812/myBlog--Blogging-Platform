@@ -1,10 +1,12 @@
 .navbar {
-    background: white;
-    box-shadow: var(--shadow-sm);
+    background: var(--bg-deep);
+    /* True Black Header */
+    box-shadow: none;
     position: sticky;
     top: 0;
     z-index: 1000;
     padding: 1rem 0;
+    border-bottom: 1px solid var(--primary-muted);
 }
 
 .nav-container {
@@ -18,9 +20,10 @@
 
 .logo {
     font-size: 1.8rem;
-    font-weight: 700;
-    color: var(--primary-color);
-    /* Teal Logo */
+    font-weight: 800;
+    color: var(--text-inverse);
+    background: none;
+    -webkit-text-fill-color: initial;
     letter-spacing: -0.5px;
 }
 
@@ -34,13 +37,16 @@
 }
 
 .nav-links a {
-    color: var(--primary-color);
-    /* Green text as in ref */
+    color: var(--text-inverse-muted);
     font-weight: 500;
-    font-size: 1rem;
+    font-size: 0.95rem;
     padding: 0.5rem 0;
     position: relative;
     transition: all 0.3s ease;
+}
+
+.nav-links a:hover {
+    color: var(--text-inverse);
 }
 
 /* Hover underline effect */
@@ -48,10 +54,10 @@
     content: '';
     position: absolute;
     width: 0;
-    height: 2px;
+    height: 1px;
     bottom: 0;
     left: 0;
-    background-color: var(--primary-color);
+    background-color: var(--text-inverse);
     transition: width 0.3s;
 }
 
@@ -60,25 +66,23 @@
 }
 
 .nav-links .btn-primary {
-    color: white !important;
+    background: var(--text-inverse);
+    color: var(--primary-color) !important;
     padding: 0.5rem 1.5rem;
-    border-radius: 20px;
+    border-radius: var(--radius);
+    -webkit-text-fill-color: initial;
+    font-weight: 600;
+}
+
+.nav-links .btn-primary:hover {
+    background: var(--secondary-muted);
+    box-shadow: none;
 }
 
 .nav-links .btn-primary:hover::after {
     width: 0;
     /* No underline for buttons */
 }
-
-/* Assuming this .nav-links block was intended to be inside a media query,
-   and the closing brace was misplaced. The instruction implies this block
-   is part of a media query that needs its brace fixed.
-   Without an explicit @media rule, we'll remove the extra closing brace. */
-.nav-links {
-    gap: 1rem;
-    font-size: 0.9rem;
-}
-
 
 .nav-profile-link {
     display: flex;
@@ -97,11 +101,11 @@
     height: 40px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid var(--primary-color);
+    border: 1px solid var(--primary-muted);
     transition: transform 0.2s;
 }
 
 .nav-profile-img:hover {
-    transform: scale(1.1);
-    box-shadow: 0 0 8px rgba(26, 188, 156, 0.4);
+    transform: scale(1.05);
+    box-shadow: 0 0 0 2px var(--primary-muted);
 }

@@ -149,7 +149,7 @@ router.get("/chat/:username", protect, async (req, res) => {
 
         res.json({
             user: req.user.username,
-            userType: req.session.type,
+            userType: req.user.type,
             activeChat: targetUser,
             messages: chatMessages,
             currentUserDetails: currentUser

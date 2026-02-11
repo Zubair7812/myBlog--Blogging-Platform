@@ -12,16 +12,13 @@
     width: 100%;
     max-width: 440px;
     margin: 3rem auto;
-    background: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(10px);
+    background: var(--card-bg);
+    /* backdrop-filter: blur(10px); Removed blur as we are using solid card bg, or use glass-overlay if preferred. */
     padding: 3rem;
-    border-radius: 1.5rem;
-    box-shadow:
-        0 20px 25px -5px rgba(0, 0, 0, 0.1),
-        0 10px 10px -5px rgba(0, 0, 0, 0.04),
-        0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
     /* Inner glow */
-    border: 1px solid rgba(255, 255, 255, 0.8);
+    border: 1px solid var(--border-color);
     position: relative;
     overflow: hidden;
     animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
@@ -70,19 +67,19 @@
 .form-group textarea {
     padding: 0.9rem 1.2rem;
     border: 2px solid transparent;
-    border-radius: 1rem;
+    border-radius: var(--radius);
     font-size: 1rem;
     transition: all 0.2s ease;
-    background-color: #f3f4f6;
+    background-color: var(--bg-alt);
     color: var(--text-color);
 }
 
 .form-group input:focus,
 .form-group textarea:focus {
     outline: none;
-    background-color: white;
+    background-color: var(--card-bg);
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+    box-shadow: var(--focus-ring);
 }
 
 .auth-footer {
@@ -103,18 +100,18 @@
 }
 
 .error-message {
-    background-color: #fef2f2;
-    color: #991b1b;
+    background-color: var(--danger-soft);
+    color: var(--danger-color);
     padding: 0.8rem;
-    border-radius: 0.75rem;
+    border-radius: var(--radius);
     font-size: 0.9rem;
     text-align: center;
-    border: 1px solid #fecaca;
+    border: 1px solid var(--danger-color);
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    font-weight: 500;
+    font-weight: 600;
     margin-bottom: 1rem;
     animation: fadeIn 0.3s ease;
 }
