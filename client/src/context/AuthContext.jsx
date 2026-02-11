@@ -1,4 +1,3 @@
-// Add this temporarily to debug
 import { createContext, useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 
@@ -20,7 +19,6 @@ export const AuthProvider = ({ children }) => {
             axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
             try {
                 const res = await axios.get('/api/auth/me');
-                console.log("AUTH CHECK - User data from /api/auth/me:", res.data); // DEBUG
                 setUser(res.data);
             } catch (error) {
                 console.error("Auth check failed", error);
@@ -36,7 +34,6 @@ export const AuthProvider = ({ children }) => {
 
     const login = async (email, password) => {
         const res = await axios.post('/api/auth/login', { email, password });
-        console.log("LOGIN - User data from /api/auth/login:", res.data); // DEBUG
         localStorage.setItem('token', res.data.token);
         axios.defaults.headers.common['Authorization'] = `Bearer ${res.data.token}`;
         setUser(res.data);
@@ -45,7 +42,6 @@ export const AuthProvider = ({ children }) => {
 
     const signup = async (name, email, password) => {
         const res = await axios.post('/api/auth/register', { name, email, password });
-        console.log("SIGNUP - User data from /api/auth/register:", res.data); // DEBUG
         localStorage.setItem('token', res.data.token);
         axios.defaults.headers.common['Authorization'] = `Bearer ${res.data.token}`;
         setUser(res.data);
@@ -57,8 +53,6 @@ export const AuthProvider = ({ children }) => {
         delete axios.defaults.headers.common['Authorization'];
         setUser(null);
     };
-
-    console.log("CURRENT USER STATE:", user); // DEBUG
 
     return (
         <AuthContext.Provider value={{ user, loading, login, signup, logout, checkAuth }}>
