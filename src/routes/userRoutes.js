@@ -7,13 +7,16 @@ const multer = require("multer");
 const path = require("path");
 
 // Middleware to check auth
-const checkAuth = (req, res, next) => {
-    if (req.session.username) {
-        next();
-    } else {
-        res.status(401).json({ error: "Unauthorized" });
-    }
-};
+const { protect } = require("../middleware/authMiddleware");
+
+// Middleware to check auth
+// const checkAuth = (req, res, next) => {
+//     if (req.session.username) {
+//         next();
+//     } else {
+//         res.status(401).json({ error: "Unauthorized" });
+//     }
+// };
 
 // Multer for Profile Pics
 const storage = multer.diskStorage({
@@ -23,7 +26,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 // Profile Page
-router.get("/profile/:username", async (req, res) => {
+router.get("/profile/:username", protect, async (req, res) => {
     try {
         const user = await User.findOne({ username: req.params.username });
         if (!user) return res.status(404).json({ error: "User not found" });
@@ -32,17 +35,16 @@ router.get("/profile/:username", async (req, res) => {
 
         // Identify current user ID
         let currentUserId = null;
-        if (req.session.username) {
-            const currentUser = await User.findOne({ username: req.session.username });
+        if (req.user && req.user.username) {
+            const currentUser = await User.findOne({ username: req.user.username });
             currentUserId = currentUser ? currentUser._id : null;
         }
 
         res.json({
-            // item: user.username, // Legacy support, no longer needed in API
-            username: req.session.username, // Logged in user's username
+            username: req.user ? req.user.username : null, // Logged in user's username
             userdata: user, // Profile owner's data
             posts: posts,
-            userType: req.session.type,
+            userType: req.user ? req.user.type : null,
             currentUserId: currentUserId
         });
     } catch (err) {
@@ -52,7 +54,7 @@ router.get("/profile/:username", async (req, res) => {
 });
 
 // Edit Profile Routes
-router.post("/editprofile/:username", checkAuth, upload.single("image"), async (req, res) => {
+router.post("/editprofile/:username", protect, upload.single("image"), async (req, res) => {
     try {
         const updateData = {
             fullname: req.body.fullname,
@@ -63,7 +65,7 @@ router.post("/editprofile/:username", checkAuth, upload.single("image"), async (
         };
         if (req.file) updateData.dp = req.file.filename;
 
-        await User.findOneAndUpdate({ username: req.session.username }, updateData);
+        await User.findOneAndUpdate({ username: req.user.username }, updateData);
         res.json({ message: "Profile updated" });
     } catch (err) {
         res.status(500).json({ error: "Error updating profile" });
@@ -71,10 +73,10 @@ router.post("/editprofile/:username", checkAuth, upload.single("image"), async (
 });
 
 // Follow User
-router.post("/follow/:id", checkAuth, async (req, res) => {
+router.post("/follow/:id", protect, async (req, res) => {
     try {
         const targetUser = await User.findById(req.params.id);
-        const currentUser = await User.findOne({ username: req.session.username });
+        const currentUser = await User.findOne({ username: req.user.username });
 
         if (!targetUser || !currentUser) return res.status(400).json({ status: 'error' });
 
@@ -107,10 +109,10 @@ router.post("/follow/:id", checkAuth, async (req, res) => {
 });
 
 // Unfollow User
-router.post("/unfollow/:id", checkAuth, async (req, res) => {
+router.post("/unfollow/:id", protect, async (req, res) => {
     try {
         const targetUser = await User.findById(req.params.id);
-        const currentUser = await User.findOne({ username: req.session.username });
+        const currentUser = await User.findOne({ username: req.user.username });
 
         if (!targetUser || !currentUser) return res.status(400).json({ status: 'error' });
 
@@ -130,8 +132,8 @@ router.post("/unfollow/:id", checkAuth, async (req, res) => {
 });
 
 // Admin Dashboard Data
-router.get("/admin", checkAuth, async (req, res) => {
-    if (req.session.type === 'admin') {
+router.get("/admin", protect, async (req, res) => {
+    if (req.user.type === 'admin') {
         try {
             const profiles = await User.find({});
             const posts = await Blog.find({});
@@ -145,8 +147,8 @@ router.get("/admin", checkAuth, async (req, res) => {
 });
 
 // Remove User (Admin)
-router.delete("/removeuser/:id", checkAuth, async (req, res) => {
-    if (req.session.type === 'admin') {
+router.delete("/removeuser/:id", protect, async (req, res) => {
+    if (req.user.type === 'admin') {
         const user = await User.findById(req.params.id);
         if (user) {
             await Blog.deleteMany({ author: user.username });

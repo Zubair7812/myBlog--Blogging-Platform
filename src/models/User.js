@@ -1,22 +1,27 @@
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
-    username: {
+    name: {
         type: String,
-        required: true,
-        trim: true
+        required: [true, 'Please add a name']
     },
     email: {
         type: String,
-        required: true,
+        required: [true, 'Please add an email'],
         unique: true,
-        trim: true,
-        lowercase: true
+        lowercase: true,
+        match: [
+            /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
+            'Please add a valid email'
+        ]
     },
     password: {
         type: String,
-        required: true
+        required: [true, 'Please add a password'],
+        minlength: 6
     },
+    // Keep existing fields for backward compatibility if needed, or remove if strict strict Phase 2 only
+    username: { type: String }, // Mapped from name if needed or kept for old data
     fullname: String,
     dp: String,
     bio: String,

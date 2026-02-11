@@ -19,21 +19,24 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 // Middleware to check auth
-const checkAuth = (req, res, next) => {
-    if (req.session.username) {
-        next();
-    } else {
-        res.status(401).json({ error: "Unauthorized" });
-    }
-};
+const { protect } = require("../middleware/authMiddleware");
+
+// Middleware for APIs
+// const checkAuth = (req, res, next) => {
+//     if (req.session.username) {
+//         next();
+//     } else {
+//         res.status(401).json({ error: "Unauthorized" });
+//     }
+// };
 
 // Create Post
-router.post("/compose", checkAuth, upload.single("image"), async (req, res) => {
+router.post("/compose", protect, upload.single("image"), async (req, res) => {
     try {
         const newPost = new Blog({
             title: req.body.postTitle,
             content: req.body.postBody,
-            author: req.session.username,
+            author: req.user.username,
             thumbnail: req.file ? req.file.filename : "default.jpg",
             date: new Date()
         });
@@ -42,6 +45,17 @@ router.post("/compose", checkAuth, upload.single("image"), async (req, res) => {
     } catch (err) {
         console.log(err);
         res.status(500).json({ error: "Error creating post" });
+    }
+});
+
+// View All Posts (Home Feed)
+router.get("/posts", async (req, res) => {
+    try {
+        const posts = await Blog.find({}).sort({ date: -1 });
+        const sortedPosts = await Blog.find({}).sort({ like: -1 }).limit(5);
+        res.json({ posts, sortedPosts });
+    } catch (err) {
+        res.status(500).json({ error: "Error fetching posts" });
     }
 });
 
@@ -56,16 +70,16 @@ router.get("/posts/:id", async (req, res) => {
         const authorUser = await User.findOne({ username: post.author });
 
         let currentUserId = null;
-        if (req.session.username) {
-            const currentUser = await User.findOne({ username: req.session.username });
+        if (req.user.username) {
+            const currentUser = await User.findOne({ username: req.user.username });
             currentUserId = currentUser ? currentUser._id : null;
         }
 
         res.json({
             post: post,
             comments: comments,
-            user: req.session.username,
-            userType: req.session.type,
+            user: req.user.username,
+            userType: req.user.type,
             authorUser: authorUser,
             currentUserId: currentUserId
         });
@@ -75,18 +89,18 @@ router.get("/posts/:id", async (req, res) => {
 });
 
 // Add Comment
-router.post("/posts/:id/comment", checkAuth, async (req, res) => {
+router.post("/posts/:id/comment", protect, async (req, res) => {
     try {
         const newComment = new Comment({
             postId: req.params.id,
-            username: req.session.username,
+            username: req.user.username,
             content: req.body.comment
         });
         await newComment.save();
 
         // Notify Post Author
         const post = await Blog.findById(req.params.id);
-        const senderUser = await User.findOne({ username: req.session.username });
+        const senderUser = await User.findOne({ username: req.user.username });
         const authorUser = await User.findOne({ username: post.author });
 
         if (authorUser && !authorUser._id.equals(senderUser._id)) {
@@ -106,10 +120,10 @@ router.post("/posts/:id/comment", checkAuth, async (req, res) => {
 });
 
 // Like Post
-router.post("/posts/:id/like", checkAuth, async (req, res) => {
+router.post("/posts/:id/like", protect, async (req, res) => {
     try {
         const post = await Blog.findById(req.params.id);
-        const user = req.session.username;
+        const user = req.user.username;
 
         if (post.likedby.includes(user)) {
             post.like -= 1;
@@ -142,7 +156,7 @@ router.post("/posts/:id/like", checkAuth, async (req, res) => {
 });
 
 // Update Post
-router.post("/update/:id", checkAuth, upload.single("image"), async (req, res) => {
+router.post("/update/:id", protect, upload.single("image"), async (req, res) => {
     try {
         const updateData = {
             title: req.body.postTitle,
@@ -158,10 +172,10 @@ router.post("/update/:id", checkAuth, upload.single("image"), async (req, res) =
 });
 
 // Delete Post
-router.delete("/delete/:id", checkAuth, async (req, res) => {
+router.delete("/delete/:id", protect, async (req, res) => {
     try {
         const post = await Blog.findById(req.params.id);
-        if (post.author === req.session.username || req.session.type === 'admin') {
+        if (post.author === req.user.username || req.user.type === 'admin') {
             await Blog.findByIdAndDelete(req.params.id);
             await Comment.deleteMany({ postId: req.params.id });
             res.json({ message: "Post deleted" });

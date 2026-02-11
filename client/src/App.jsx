@@ -16,13 +16,16 @@ import EditProfile from './pages/EditProfile';
 import Admin from './pages/Admin';
 import NotFound from './pages/NotFound';
 import Footer from './components/Footer';
+import { StrictMode } from 'react';
 
 function App() {
   return (
     <Router>
-      <AuthProvider>
-        <MainRoutes />
-      </AuthProvider>
+      <StrictMode>
+        <AuthProvider>
+          <MainRoutes />
+        </AuthProvider>
+      </StrictMode>
     </Router>
   );
 }
@@ -44,15 +47,15 @@ const MainRoutes = () => {
       <Navbar />
       <div className="content-container">
         <Routes>
-          <Route path="/" element={<Navigate to="/home" />} />
-          <Route path="/home" element={<Home />} />
-          <Route path="/search" element={<Search />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/" element={<Navigate to="/home" />} />
+          <Route path="/home" element={<PrivateRoute><Home /></PrivateRoute>} />
+          <Route path="/search" element={<PrivateRoute><Search /></PrivateRoute>} />
           <Route path="/compose" element={<PrivateRoute><CreatePost /></PrivateRoute>} />
           <Route path="/edit/:id" element={<PrivateRoute><EditPost /></PrivateRoute>} />
-          <Route path="/posts/:id" element={<PostDetail />} />
-          <Route path="/profile/:username" element={<Profile />} />
+          <Route path="/posts/:id" element={<PrivateRoute><PostDetail /></PrivateRoute>} />
+          <Route path="/profile/:username" element={<PrivateRoute><Profile /></PrivateRoute>} />
           <Route path="/editprofile/:username" element={<PrivateRoute><EditProfile /></PrivateRoute>} />
           <Route path="/notifications" element={<PrivateRoute><Notifications /></PrivateRoute>} />
           <Route path="/chat" element={<PrivateRoute><Chat /></PrivateRoute>} />

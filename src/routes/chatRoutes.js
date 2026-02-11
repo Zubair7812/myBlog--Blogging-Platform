@@ -4,18 +4,21 @@ const Message = require("../models/Message");
 const User = require("../models/User");
 
 // Middleware for APIs
-const checkAuth = (req, res, next) => {
-    if (req.session.username) next();
-    else res.status(401).json({ error: "Unauthorized" });
-};
+const { protect } = require("../middleware/authMiddleware");
+
+// Middleware for APIs
+// const checkAuth = (req, res, next) => {
+//     if (req.session.username) next();
+//     else res.status(401).json({ error: "Unauthorized" });
+// };
 
 // --- Static Routes (Must come before dynamic :username) ---
 
 // API: Get Contacts (Sidebar Polling)
-router.get("/chat/contacts", checkAuth, async (req, res) => {
+router.get("/chat/contacts", protect, async (req, res) => {
     try {
-        const currentUser = await User.findOne({ username: req.session.username });
-        console.log(`Fetching contacts for: ${req.session.username}, ID: ${currentUser?._id}`);
+        const currentUser = await User.findOne({ username: req.user.username });
+        console.log(`Fetching contacts for: ${req.user.username}, ID: ${currentUser?._id}`);
 
         // Find distinct users who have chatted with current user
         const messages = await Message.find({
@@ -60,9 +63,9 @@ router.get("/chat/contacts", checkAuth, async (req, res) => {
 });
 
 // API: Get Global Unread Count
-router.get("/chat/unread-count", checkAuth, async (req, res) => {
+router.get("/chat/unread-count", protect, async (req, res) => {
     try {
-        const currentUser = await User.findOne({ username: req.session.username });
+        const currentUser = await User.findOne({ username: req.user.username });
         const count = await Message.countDocuments({
             recipient: currentUser._id,
             read: false
@@ -74,10 +77,10 @@ router.get("/chat/unread-count", checkAuth, async (req, res) => {
 });
 
 // API: Send Message
-router.post("/chat/send", checkAuth, async (req, res) => {
+router.post("/chat/send", protect, async (req, res) => {
     try {
         const { recipientUsername, content, type, metadata } = req.body;
-        const currentUser = await User.findOne({ username: req.session.username });
+        const currentUser = await User.findOne({ username: req.user.username });
         const recipientUser = await User.findOne({ username: recipientUsername });
 
         if (!currentUser) return res.status(401).json({ error: "User session invalid" });
@@ -101,10 +104,10 @@ router.post("/chat/send", checkAuth, async (req, res) => {
 });
 
 // API: Mark messages as read
-router.post("/chat/mark-read", checkAuth, async (req, res) => {
+router.post("/chat/mark-read", protect, async (req, res) => {
     try {
         const { senderUsername } = req.body;
-        const currentUser = await User.findOne({ username: req.session.username });
+        const currentUser = await User.findOne({ username: req.user.username });
         const sender = await User.findOne({ username: senderUsername });
 
         if (sender) {
@@ -121,7 +124,7 @@ router.post("/chat/mark-read", checkAuth, async (req, res) => {
 
 // Chat Dashboard (Recent Conversations) - Redundant with contacts, but kept for legacy if needed
 // router.get("/chat", ... ) -> This is likely not used by React implementation, skipping or keeping simple.
-router.get("/chat", checkAuth, (req, res) => {
+router.get("/chat", protect, (req, res) => {
     res.json({ message: "Use /chat/contacts for dashboard data" });
 });
 
@@ -129,9 +132,9 @@ router.get("/chat", checkAuth, (req, res) => {
 // --- Dynamic Routes (Must come last) ---
 
 // Specific Chat
-router.get("/chat/:username", checkAuth, async (req, res) => {
+router.get("/chat/:username", protect, async (req, res) => {
     try {
-        const currentUser = await User.findOne({ username: req.session.username });
+        const currentUser = await User.findOne({ username: req.user.username });
         const targetUser = await User.findOne({ username: req.params.username });
 
         if (!targetUser) return res.status(404).json({ error: "User not found" });
@@ -145,7 +148,7 @@ router.get("/chat/:username", checkAuth, async (req, res) => {
         }).sort({ createdAt: 1 }).populate('sender recipient', 'username dp fullname');
 
         res.json({
-            user: req.session.username,
+            user: req.user.username,
             userType: req.session.type,
             activeChat: targetUser,
             messages: chatMessages,
@@ -158,10 +161,10 @@ router.get("/chat/:username", checkAuth, async (req, res) => {
 });
 
 // API: Get New Messages (Polling)
-router.get("/chat/:username/poll", checkAuth, async (req, res) => {
+router.get("/chat/:username/poll", protect, async (req, res) => {
     try {
         const lastId = req.query.lastId; // Pass last received message ID
-        const currentUser = await User.findOne({ username: req.session.username });
+        const currentUser = await User.findOne({ username: req.user.username });
         const targetUser = await User.findOne({ username: req.params.username });
 
         const query = {

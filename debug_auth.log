@@ -1,0 +1,15 @@
+[2026-02-11T08:11:04.796Z] Register request body: {"name":"Test User","email":"test1770797464663@example.com","password":"password123"}
+[2026-02-11T08:11:04.923Z] Password hashed successfully
+[2026-02-11T08:11:04.938Z] User created: 698c399840e995a0fd4ff669
+[2026-02-11T08:11:04.957Z] Login request body: {"email":"test1770797464663@example.com","password":"password123"}
+[2026-02-11T08:11:04.965Z] User found: Yes
+[2026-02-11T08:11:05.082Z] Password match: Yes
+[2026-02-11T08:11:53.867Z] Register request body: {"name":"Test User","email":"test1770797513820@example.com","password":"password123"}
+[2026-02-11T08:11:53.979Z] Password hashed successfully
+[2026-02-11T08:11:53.989Z] User created: 698c39c940e995a0fd4ff66d
+[2026-02-11T08:11:54.004Z] Login request body: {"email":"test1770797513820@example.com","password":"password123"}
+[2026-02-11T08:11:54.009Z] User found: Yes
+[2026-02-11T08:11:54.112Z] Password match: Yes
+[2026-02-11T08:12:49.780Z] Login request body: {"email":"mohammed.zubair.7812@gmail.com","password":"zubair"}
+[2026-02-11T08:12:49.792Z] User found: Yes
+[2026-02-11T08:12:49.985Z] Password match: Yes

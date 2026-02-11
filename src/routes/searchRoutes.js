@@ -3,8 +3,10 @@ const router = express.Router();
 const Blog = require("../models/Blog");
 const User = require("../models/User");
 
+const { protect } = require("../middleware/authMiddleware");
+
 // Main Search Route
-router.get("/search", async (req, res) => {
+router.get("/search", protect, async (req, res) => {
     const query = req.query.q;
     const filter = req.query.filter || 'all'; // 'all', 'posts', 'people'
 
@@ -31,8 +33,8 @@ router.get("/search", async (req, res) => {
             posts: posts,
             users: users,
             filter: filter,
-            user: req.session.username,
-            userType: req.session.type
+            user: req.user.username,
+            userType: req.user.type
         });
 
     } catch (err) {
