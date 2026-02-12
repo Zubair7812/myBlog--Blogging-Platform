@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
+import ShareBlogModal from '../components/ShareBlogModal';
 import './PostDetail.css';
 
 const PostDetail = () => {
@@ -15,6 +16,7 @@ const PostDetail = () => {
     const [commentText, setCommentText] = useState('');
     const [likes, setLikes] = useState(0);
     const [isLiked, setIsLiked] = useState(false);
+    const [showShareModal, setShowShareModal] = useState(false);
 
     useEffect(() => {
         const fetchPost = async () => {
@@ -74,6 +76,7 @@ const PostDetail = () => {
     if (!post) return <div>Post not found</div>;
 
     const isOwner = user && (user.username === post.author || user.type === 'admin');
+    const blogUrl = `${window.location.origin}/posts/${id}`;
 
     return (
         <div className="container post-detail-container">
@@ -92,9 +95,9 @@ const PostDetail = () => {
                             <Link to={`/chat/${post.author}`} className="btn btn-primary btn-sm">
                                 <i className="fas fa-comment"></i> Chat with Author
                             </Link>
-                            <Link to={`/chat?share=${encodeURIComponent(`Check out this blog: ${post.title} - ${window.location.origin}/posts/${id}`)}`} className="btn btn-secondary btn-sm">
+                            <button onClick={() => setShowShareModal(true)} className="btn btn-secondary btn-sm">
                                 <i className="fas fa-share"></i> Share Blog
-                            </Link>
+                            </button>
                         </div>
                     )}
 
@@ -102,6 +105,9 @@ const PostDetail = () => {
                         <div className="owner-actions">
                             <Link to={`/edit/${id}`} className="btn btn-secondary btn-sm">Edit</Link>
                             <button onClick={handleDelete} className="btn btn-danger btn-sm">Delete</button>
+                            <button onClick={() => setShowShareModal(true)} className="btn btn-primary btn-sm">
+                                <i className="fas fa-share"></i> Share Blog
+                            </button>
                         </div>
                     )}
                 </div>
@@ -152,6 +158,13 @@ const PostDetail = () => {
                     ))}
                 </div>
             </div>
+
+            <ShareBlogModal
+                isOpen={showShareModal}
+                onClose={() => setShowShareModal(false)}
+                blogTitle={post.title}
+                blogUrl={blogUrl}
+            />
         </div>
     );
 };
