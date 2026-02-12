@@ -13,6 +13,25 @@ const Profile = () => {
     const [isFollowing, setIsFollowing] = useState(false);
     const [followersCount, setFollowersCount] = useState(0);
 
+    // Override parent content-container so the sidebar touches the left viewport edge
+    useEffect(() => {
+        const contentContainer = document.querySelector('.content-container');
+        if (contentContainer) {
+            contentContainer.style.maxWidth = '100%';
+            contentContainer.style.paddingLeft = '0';
+            contentContainer.style.paddingTop = '0';
+            contentContainer.style.paddingBottom = '0';
+        }
+        return () => {
+            if (contentContainer) {
+                contentContainer.style.maxWidth = '';
+                contentContainer.style.paddingLeft = '';
+                contentContainer.style.paddingTop = '';
+                contentContainer.style.paddingBottom = '';
+            }
+        };
+    }, []);
+
     useEffect(() => {
         const fetchProfile = async () => {
             try {

@@ -1,17 +1,43 @@
 .auth-page-wrapper {
     /* Use a dedicated wrapper in the component if possible, 
        otherwise this class can be applied to the main container for auth pages */
-    min-height: 80vh;
+    min-height: calc(100vh - 80px);
+    /* Account for navbar height */
+    width: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 2rem;
+    position: relative;
+    background-color: var(--background-color);
+    margin: 0;
+    box-sizing: border-box;
+    overflow: hidden;
+
+    /* Subtle diagonal line texture - Light Mode */
+    background-image: repeating-linear-gradient(45deg,
+            transparent,
+            transparent 40px,
+            rgba(0, 0, 0, 0.05) 40px,
+            rgba(0, 0, 0, 0.05) 41px);
 }
 
+/* Dark mode line texture */
+[data-theme="dark"] .auth-page-wrapper {
+    background-image: repeating-linear-gradient(45deg,
+            transparent,
+            transparent 40px,
+            rgba(255, 255, 255, 0.07) 40px,
+            rgba(255, 255, 255, 0.07) 41px);
+}
+
+/* Aesthetic Background Layer */
 .auth-container {
     width: 100%;
     max-width: 440px;
     margin: 3rem auto;
+    position: relative;
+    z-index: 2;
     background: var(--card-bg);
     /* backdrop-filter: blur(10px); Removed blur as we are using solid card bg, or use glass-overlay if preferred. */
     padding: 3rem;
@@ -121,4 +147,17 @@
     display: block;
     margin-top: 1.5rem;
     text-align: center;
+}
+
+/* Animations */
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }

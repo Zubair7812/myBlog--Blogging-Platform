@@ -14,8 +14,7 @@
     padding: 0;
     text-align: center;
     position: relative;
-    /* The distinctive curve from the reference */
-    border-bottom-right-radius: 150px;
+    border-bottom-right-radius: 0;
     flex-shrink: 0;
     display: flex;
     flex-direction: column;

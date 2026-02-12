@@ -138,6 +138,14 @@
   --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.9);
 }
 
+html,
+body,
+#root {
+  width: 100%;
+  overflow-x: hidden;
+  position: relative;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -157,6 +165,7 @@ body {
   background-color: var(--background-color);
   color: var(--text-color);
   line-height: 1.6;
+  overflow-x: hidden;
 }
 
 a {
@@ -181,6 +190,7 @@ a:hover {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 .content-container {

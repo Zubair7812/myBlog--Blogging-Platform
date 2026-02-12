@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import ThemeToggle from './ThemeToggle';
 import './Navbar.css';
@@ -12,6 +12,9 @@ const Navbar = () => {
         navigate('/');
     };
 
+    const location = useLocation();
+    const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
+
     return (
         <nav className="navbar">
             <div className="container nav-container">
@@ -19,8 +22,13 @@ const Navbar = () => {
                     <img src="/logo.svg" alt="MyBlog Logo" className="logo-img" />
                 </Link>
                 <ul className="nav-links">
-                    <li><Link to="/home">Home</Link></li>
-                    <li><Link to="/search">Search</Link></li>
+                    {!isAuthPage && (
+                        <>
+                            <li><Link to="/home">Home</Link></li>
+                            <li><Link to="/search">Search</Link></li>
+                        </>
+                    )}
+
                     {user ? (
                         <>
                             <li><Link to="/notifications">Notifications</Link></li>
@@ -41,8 +49,12 @@ const Navbar = () => {
                         </>
                     ) : (
                         <>
-                            <li><Link to="/login">Login</Link></li>
-                            <li><Link to="/register" className="btn btn-primary">Register</Link></li>
+                            {!isAuthPage && (
+                                <>
+                                    <li><Link to="/login">Login</Link></li>
+                                    <li><Link to="/register" className="btn btn-primary">Register</Link></li>
+                                </>
+                            )}
                             <li><ThemeToggle /></li>
                         </>
                     )}

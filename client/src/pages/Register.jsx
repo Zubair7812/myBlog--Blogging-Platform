@@ -17,6 +17,25 @@ const Register = () => {
         }
     }, [user, navigate]);
 
+    // Override parent content-container styles for full-page layout
+    useEffect(() => {
+        const contentContainer = document.querySelector('.content-container');
+        if (contentContainer) {
+            contentContainer.style.maxWidth = '100%';
+            contentContainer.style.padding = '0';
+            contentContainer.style.width = '100%';
+            contentContainer.style.overflow = 'hidden';
+        }
+        return () => {
+            if (contentContainer) {
+                contentContainer.style.maxWidth = '';
+                contentContainer.style.padding = '';
+                contentContainer.style.width = '';
+                contentContainer.style.overflow = '';
+            }
+        };
+    }, []);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
@@ -29,8 +48,8 @@ const Register = () => {
     };
 
     return (
-        <div className="auth-container">
-            <div className="auth-card">
+        <div className="auth-page-wrapper">
+            <div className="auth-container">
                 <h2>Register</h2>
                 {error && <div className="error-message">{error}</div>}
                 <form onSubmit={handleSubmit}>
