@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams, Link, useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
+import EmojiPickerButton from '../components/EmojiPickerButton';
 import './Chat.css';
 
 const Chat = () => {
@@ -90,6 +91,29 @@ const Chat = () => {
             messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
         }
     }, [messages]);
+
+    // Function to convert URLs in text to clickable links
+    const linkifyText = (text) => {
+        const urlRegex = /(https?:\/\/[^\s]+)/g;
+        const parts = text.split(urlRegex);
+
+        return parts.map((part, index) => {
+            if (part.match(urlRegex)) {
+                return (
+                    <a
+                        key={index}
+                        href={part}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="chat-link"
+                    >
+                        {part}
+                    </a>
+                );
+            }
+            return part;
+        });
+    };
 
     const handleSendMessage = async (e) => {
         e.preventDefault();
@@ -180,7 +204,9 @@ const Chat = () => {
                                             <div
                                                 className={`message-bubble ${msg.sender?._id?.toString() === activeChatUser?._id?.toString() ? 'received' : 'sent'}`}
                                             >
-                                                <p>{msg.content}</p>
+                                                <p style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                                                    {linkifyText(msg.content)}
+                                                </p>
                                                 <small>{new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</small>
                                             </div>
                                         </div>
@@ -195,6 +221,7 @@ const Chat = () => {
                                 value={newMessage}
                                 onChange={(e) => setNewMessage(e.target.value)}
                             />
+                            <EmojiPickerButton onEmojiClick={(emoji) => setNewMessage(prev => prev + emoji)} />
                             <button type="submit" className="btn btn-primary">Send</button>
                         </form>
                     </>

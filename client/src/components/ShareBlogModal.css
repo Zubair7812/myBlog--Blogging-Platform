@@ -13,8 +13,13 @@
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 .modal-content {
@@ -34,6 +39,7 @@
         transform: translateY(50px);
         opacity: 0;
     }
+
     to {
         transform: translateY(0);
         opacity: 1;
@@ -165,6 +171,51 @@
     border-radius: 6px;
     text-align: center;
 }
+
+.message-input-section {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e0e0e0;
+}
+
+.message-input-section label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #333;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.message-input-section textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    resize: vertical;
+    transition: border-color 0.2s;
+}
+
+.message-input-section textarea:focus {
+    outline: none;
+    border-color: #1abc9c;
+}
+
+.message-input-section textarea::placeholder {
+    color: #999;
+}
+
+.textarea-with-emoji {
+    position: relative;
+}
+
+.emoji-btn-wrapper {
+    position: absolute;
+    bottom: 0.5rem;
+    right: 0.5rem;
+}
+
 
 .modal-footer {
     padding: 1rem 1.5rem;

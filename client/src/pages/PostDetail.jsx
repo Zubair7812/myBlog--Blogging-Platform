@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import ShareBlogModal from '../components/ShareBlogModal';
+import EmojiPickerButton from '../components/EmojiPickerButton';
 import './PostDetail.css';
 
 const PostDetail = () => {
@@ -138,12 +139,17 @@ const PostDetail = () => {
                 <h3>Comments ({comments.length})</h3>
                 {user && (
                     <form onSubmit={handleComment} className="comment-form">
-                        <textarea
-                            value={commentText}
-                            onChange={(e) => setCommentText(e.target.value)}
-                            placeholder="Add a comment..."
-                            rows="3"
-                        ></textarea>
+                        <div className="comment-input-wrapper">
+                            <textarea
+                                value={commentText}
+                                onChange={(e) => setCommentText(e.target.value)}
+                                placeholder="Add a comment..."
+                                rows="3"
+                            ></textarea>
+                            <div className="comment-emoji-btn">
+                                <EmojiPickerButton onEmojiClick={(emoji) => setCommentText(prev => prev + emoji)} />
+                            </div>
+                        </div>
                         <button type="submit" className="btn btn-primary">Post Comment</button>
                     </form>
                 )}

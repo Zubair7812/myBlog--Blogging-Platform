@@ -168,6 +168,16 @@
     box-shadow: var(--focus-ring);
 }
 
+.comment-input-wrapper {
+    position: relative;
+}
+
+.comment-emoji-btn {
+    position: absolute;
+    bottom: 1.5rem;
+    right: 0.5rem;
+}
+
 .comments-list {
     display: flex;
     flex-direction: column;

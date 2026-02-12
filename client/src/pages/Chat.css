@@ -193,6 +193,25 @@
     border-bottom-left-radius: 4px;
 }
 
+.message-bubble .chat-link {
+    color: #0066cc;
+    text-decoration: underline;
+    word-break: break-all;
+    transition: color 0.2s;
+}
+
+.message-bubble.sent .chat-link {
+    color: #4da6ff;
+}
+
+.message-bubble .chat-link:hover {
+    color: #004499;
+}
+
+.message-bubble.sent .chat-link:hover {
+    color: #80c1ff;
+}
+
 .chat-input-area {
     padding: 1rem;
     border-top: 1px solid var(--divider-color);

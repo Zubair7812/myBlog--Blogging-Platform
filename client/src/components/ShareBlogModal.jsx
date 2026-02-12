@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import EmojiPickerButton from './EmojiPickerButton';
 import './ShareBlogModal.css';
 
 const ShareBlogModal = ({ isOpen, onClose, blogTitle, blogUrl }) => {
     const [contacts, setContacts] = useState([]);
     const [selectedContacts, setSelectedContacts] = useState([]);
+    const [customMessage, setCustomMessage] = useState('');
     const [loading, setLoading] = useState(false);
     const [sending, setSending] = useState(false);
     const [message, setMessage] = useState('');
@@ -12,6 +14,7 @@ const ShareBlogModal = ({ isOpen, onClose, blogTitle, blogUrl }) => {
     useEffect(() => {
         if (isOpen) {
             fetchContacts();
+            setCustomMessage(''); // Reset message when modal opens
         }
     }, [isOpen]);
 
@@ -42,7 +45,13 @@ const ShareBlogModal = ({ isOpen, onClose, blogTitle, blogUrl }) => {
         }
 
         setSending(true);
-        const shareMessage = `Check out this blog: ${blogTitle}\n${blogUrl}`;
+
+        // Build the share message with optional custom message
+        let shareMessage = '';
+        if (customMessage.trim()) {
+            shareMessage = `${customMessage}\n\n`;
+        }
+        shareMessage += `📝 ${blogTitle}\n🔗 ${blogUrl}`;
 
         try {
             // Send to all selected contacts
@@ -59,6 +68,7 @@ const ShareBlogModal = ({ isOpen, onClose, blogTitle, blogUrl }) => {
             setTimeout(() => {
                 onClose();
                 setSelectedContacts([]);
+                setCustomMessage('');
                 setMessage('');
             }, 1500);
         } catch (err) {
@@ -87,25 +97,45 @@ const ShareBlogModal = ({ isOpen, onClose, blogTitle, blogUrl }) => {
                     ) : contacts.length === 0 ? (
                         <p className="no-contacts-msg">No contacts available. Start chatting with someone first!</p>
                     ) : (
-                        <div className="contacts-grid">
-                            {contacts.map(contact => (
-                                <div
-                                    key={contact.user._id}
-                                    className={`contact-card ${selectedContacts.includes(contact.user.username) ? 'selected' : ''}`}
-                                    onClick={() => toggleContact(contact.user.username)}
-                                >
-                                    <img
-                                        src={contact.user.dp ? `/thumbnails/${contact.user.dp}` : '/thumbnails/default-user.jpg'}
-                                        alt={contact.user.username}
-                                        onError={(e) => { e.target.src = 'https://via.placeholder.com/50' }}
-                                    />
-                                    <div className="contact-name">{contact.user.fullname || contact.user.username}</div>
-                                    {selectedContacts.includes(contact.user.username) && (
-                                        <div className="check-icon">✓</div>
-                                    )}
+                        <>
+                            <div className="contacts-grid">
+                                {contacts.map(contact => (
+                                    <div
+                                        key={contact.user._id}
+                                        className={`contact-card ${selectedContacts.includes(contact.user.username) ? 'selected' : ''}`}
+                                        onClick={() => toggleContact(contact.user.username)}
+                                    >
+                                        <img
+                                            src={contact.user.dp ? `/thumbnails/${contact.user.dp}` : '/thumbnails/default-user.jpg'}
+                                            alt={contact.user.username}
+                                            onError={(e) => { e.target.src = 'https://via.placeholder.com/50' }}
+                                        />
+                                        <div className="contact-name">{contact.user.fullname || contact.user.username}</div>
+                                        {selectedContacts.includes(contact.user.username) && (
+                                            <div className="check-icon">✓</div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+
+                            {selectedContacts.length > 0 && (
+                                <div className="message-input-section">
+                                    <label htmlFor="customMessage">Add a message (optional):</label>
+                                    <div className="textarea-with-emoji">
+                                        <textarea
+                                            id="customMessage"
+                                            placeholder="Add your thoughts about this blog..."
+                                            value={customMessage}
+                                            onChange={(e) => setCustomMessage(e.target.value)}
+                                            rows="3"
+                                        />
+                                        <div className="emoji-btn-wrapper">
+                                            <EmojiPickerButton onEmojiClick={(emoji) => setCustomMessage(prev => prev + emoji)} />
+                                        </div>
+                                    </div>
                                 </div>
-                            ))}
-                        </div>
+                            )}
+                        </>
                     )}
 
                     {message && <div className="share-message">{message}</div>}
