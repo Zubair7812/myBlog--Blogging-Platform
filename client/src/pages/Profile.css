@@ -126,8 +126,8 @@
 }
 
 .btn-edit-profile {
-    background-color: var(--primary-color);
-    color: white;
+    background-color: #FFFFFF;
+    color: #0A0A0A !important;
     padding: 0.8rem 2rem;
     border-radius: var(--radius);
     font-weight: 700;
@@ -135,12 +135,13 @@
     display: block;
     box-shadow: var(--shadow-sm);
     transition: var(--transition);
+    -webkit-text-fill-color: #0A0A0A;
 }
 
 .btn-edit-profile:hover {
-    background-color: #333333;
-    color: white;
-    box-shadow: 0 0 15px var(--primary-muted);
+    background-color: #E5E5E5;
+    color: #0A0A0A !important;
+    box-shadow: var(--shadow-md);
 }
 
 
@@ -237,18 +238,22 @@
 }
 
 .btn-readmore {
-    background-color: var(--primary-color);
-    color: white !important;
+    background-color: #FFFFFF;
+    /* Always white background */
+    color: #0A0A0A !important;
+    /* Always black text */
     padding: 0.5rem 1.2rem;
     border-radius: var(--radius);
     font-size: 0.85rem;
     font-weight: 600;
     text-transform: capitalize;
+    -webkit-text-fill-color: #0A0A0A;
 }
 
 .btn-readmore:hover {
-    background-color: #333333;
-    color: white !important;
+    background-color: #E5E5E5;
+    /* Light gray on hover */
+    color: #0A0A0A !important;
 }
 
 @media (max-width: 900px) {

@@ -23,15 +23,16 @@
 }
 
 .modal-content {
-    background: white;
+    background: var(--card-bg);
     border-radius: 12px;
     max-width: 600px;
     width: 90%;
     max-height: 80vh;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    box-shadow: var(--shadow-lg);
     animation: slideUp 0.3s ease;
+    border: 1px solid var(--border-color);
 }
 
 @keyframes slideUp {
@@ -48,7 +49,7 @@
 
 .modal-header {
     padding: 1.5rem;
-    border-bottom: 1px solid #e0e0e0;
+    border-bottom: 1px solid var(--border-color);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -57,14 +58,14 @@
 .modal-header h2 {
     margin: 0;
     font-size: 1.5rem;
-    color: #333;
+    color: var(--text-color);
 }
 
 .close-btn {
     background: none;
     border: none;
     font-size: 2rem;
-    color: #666;
+    color: var(--text-muted);
     cursor: pointer;
     padding: 0;
     width: 30px;
@@ -76,7 +77,7 @@
 }
 
 .close-btn:hover {
-    color: #000;
+    color: var(--text-color);
 }
 
 .modal-body {
@@ -87,20 +88,20 @@
 
 .share-instruction {
     margin-bottom: 1rem;
-    color: #666;
+    color: var(--text-secondary);
     font-size: 0.95rem;
 }
 
 .loading-spinner {
     text-align: center;
     padding: 2rem;
-    color: #666;
+    color: var(--text-muted);
 }
 
 .no-contacts-msg {
     text-align: center;
     padding: 2rem;
-    color: #999;
+    color: var(--text-muted);
 }
 
 .contacts-grid {
@@ -114,22 +115,23 @@
     flex-direction: column;
     align-items: center;
     padding: 1rem;
-    border: 2px solid #e0e0e0;
+    border: 2px solid var(--border-color);
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.2s;
     position: relative;
+    background: var(--card-bg);
 }
 
 .contact-card:hover {
-    border-color: #1abc9c;
+    border-color: var(--primary-color);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(26, 188, 156, 0.2);
+    box-shadow: var(--shadow-md);
 }
 
 .contact-card.selected {
-    border-color: #1abc9c;
-    background: #e8f8f5;
+    border-color: var(--primary-color);
+    background: var(--card-hover);
 }
 
 .contact-card img {
@@ -143,7 +145,7 @@
 .contact-name {
     font-size: 0.85rem;
     text-align: center;
-    color: #333;
+    color: var(--text-color);
     font-weight: 500;
 }
 
@@ -151,8 +153,8 @@
     position: absolute;
     top: 0.5rem;
     right: 0.5rem;
-    background: #1abc9c;
-    color: white;
+    background: var(--primary-color);
+    color: var(--card-bg);
     width: 24px;
     height: 24px;
     border-radius: 50%;
@@ -166,8 +168,8 @@
 .share-message {
     margin-top: 1rem;
     padding: 0.75rem;
-    background: #d4edda;
-    color: #155724;
+    background: var(--success-soft);
+    color: var(--success-color);
     border-radius: 6px;
     text-align: center;
 }
@@ -175,13 +177,13 @@
 .message-input-section {
     margin-top: 1.5rem;
     padding-top: 1rem;
-    border-top: 1px solid #e0e0e0;
+    border-top: 1px solid var(--border-color);
 }
 
 .message-input-section label {
     display: block;
     margin-bottom: 0.5rem;
-    color: #333;
+    color: var(--text-color);
     font-weight: 500;
     font-size: 0.9rem;
 }
@@ -189,21 +191,23 @@
 .message-input-section textarea {
     width: 100%;
     padding: 0.75rem;
-    border: 1px solid #ddd;
+    border: 1px solid var(--border-color);
     border-radius: 6px;
     font-family: inherit;
     font-size: 0.9rem;
     resize: vertical;
     transition: border-color 0.2s;
+    background: var(--card-bg);
+    color: var(--text-color);
 }
 
 .message-input-section textarea:focus {
     outline: none;
-    border-color: #1abc9c;
+    border-color: var(--primary-color);
 }
 
 .message-input-section textarea::placeholder {
-    color: #999;
+    color: var(--text-muted);
 }
 
 .textarea-with-emoji {
@@ -219,7 +223,7 @@
 
 .modal-footer {
     padding: 1rem 1.5rem;
-    border-top: 1px solid #e0e0e0;
+    border-top: 1px solid var(--border-color);
     display: flex;
     justify-content: flex-end;
     gap: 0.75rem;
@@ -239,23 +243,25 @@
 }
 
 .modal-footer .btn-secondary {
-    background: #e0e0e0;
-    color: #333;
+    background: var(--danger-color);
+    color: white !important;
     border: none;
+    -webkit-text-fill-color: white;
 }
 
 .modal-footer .btn-secondary:hover:not(:disabled) {
-    background: #d0d0d0;
+    background: #991b1b;
 }
 
 .modal-footer .btn-primary {
-    background: #1abc9c;
-    color: white;
+    background: #FFFFFF;
+    color: #0A0A0A !important;
     border: none;
+    -webkit-text-fill-color: #0A0A0A;
 }
 
 .modal-footer .btn-primary:hover:not(:disabled) {
-    background: #16a085;
+    background: #E5E5E5;
 }
 
 @media (max-width: 600px) {

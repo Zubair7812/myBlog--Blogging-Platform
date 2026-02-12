@@ -1,0 +1,43 @@
+.theme-toggle-btn {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    padding: 0.6rem;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    color: var(--text-color);
+    box-shadow: var(--shadow-sm);
+}
+
+.theme-toggle-btn:hover {
+    background: var(--card-hover);
+    border-color: var(--primary-color);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.theme-toggle-btn:active {
+    transform: translateY(0);
+}
+
+.theme-toggle-btn svg {
+    transition: transform 0.3s ease;
+}
+
+.theme-toggle-btn:hover svg {
+    transform: rotate(15deg);
+}
+
+/* Animation for theme switch */
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}

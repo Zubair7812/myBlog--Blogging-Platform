@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Login from './pages/Login';
@@ -22,9 +23,11 @@ function App() {
   return (
     <Router>
       <StrictMode>
-        <AuthProvider>
-          <MainRoutes />
-        </AuthProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <MainRoutes />
+          </AuthProvider>
+        </ThemeProvider>
       </StrictMode>
     </Router>
   );

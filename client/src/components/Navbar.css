@@ -1,6 +1,6 @@
 .navbar {
     background: var(--bg-deep);
-    /* True Black Header */
+    /* Always black navbar */
     box-shadow: none;
     position: sticky;
     top: 0;
@@ -31,7 +31,6 @@
 
 .logo-img {
     height: 40px;
-    /* Adjust based on desired size */
     width: auto;
     display: block;
 }
@@ -46,7 +45,8 @@
 }
 
 .nav-links a {
-    color: var(--text-inverse-muted);
+    color: #D4D4D4;
+    /* Always light gray on black navbar */
     font-weight: 500;
     font-size: 0.95rem;
     padding: 0.5rem 0;
@@ -55,7 +55,8 @@
 }
 
 .nav-links a:hover {
-    color: var(--text-inverse);
+    color: #FAFAFA;
+    /* Brighter on hover */
 }
 
 /* Hover underline effect */
@@ -66,7 +67,7 @@
     height: 1px;
     bottom: 0;
     left: 0;
-    background-color: var(--text-inverse);
+    background-color: #FAFAFA;
     transition: width 0.3s;
 }
 
@@ -75,28 +76,30 @@
 }
 
 .nav-links .btn-primary {
-    background: var(--text-inverse);
-    color: var(--primary-color) !important;
+    background: #FFFFFF;
+    /* Always white button */
+    color: #0A0A0A !important;
+    /* Always black text */
     padding: 0.5rem 1.5rem;
     border-radius: var(--radius);
-    -webkit-text-fill-color: initial;
+    -webkit-text-fill-color: #0A0A0A;
     font-weight: 600;
 }
 
 .nav-links .btn-primary:hover {
-    background: #e5e5e5;
-    /* Slight dimming */
+    background: #E5E5E5;
     box-shadow: none;
 }
 
 .nav-links .btn-primary:hover::after {
     width: 0;
-    /* No underline for buttons */
 }
 
 .btn-logout {
-    background: var(--text-inverse);
-    color: var(--primary-color) !important;
+    background: #FFFFFF;
+    /* Always white button */
+    color: #0A0A0A !important;
+    /* Always black text */
     padding: 0.5rem 1.5rem;
     border-radius: var(--radius);
     font-weight: 600;
@@ -105,20 +108,17 @@
 }
 
 .btn-logout:hover {
-    background: #e5e5e5;
-    /* Slight dimming */
+    background: #E5E5E5;
 }
 
 .nav-profile-link {
     display: flex;
     align-items: center;
     padding: 0 !important;
-    /* Override default padding */
 }
 
 .nav-profile-link::after {
     display: none !important;
-    /* No underline */
 }
 
 .nav-profile-img {
@@ -126,11 +126,11 @@
     height: 40px;
     border-radius: 50%;
     object-fit: cover;
-    border: 1px solid var(--primary-muted);
+    border: 2px solid #333333;
     transition: transform 0.2s;
 }
 
 .nav-profile-img:hover {
     transform: scale(1.05);
-    box-shadow: 0 0 0 2px var(--primary-muted);
+    box-shadow: 0 0 0 2px #FAFAFA;
 }

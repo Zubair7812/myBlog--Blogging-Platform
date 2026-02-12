@@ -37,6 +37,7 @@
   --text-inverse: #FAFAFA;
   /* On Black */
   --text-inverse-muted: #D4D4D4;
+  --text-light: #525252;
 
   --link-color: #0A0A0A;
   --link-hover: #404040;
@@ -74,8 +75,78 @@
   --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Dark Mode Theme */
+[data-theme="dark"] {
+  /* Core Brand Colors (Dark Mode) */
+  --primary-color: #FFFFFF;
+  --primary-soft: #F5F5F5;
+  --primary-muted: #E5E5E5;
+  --primary-gradient: linear-gradient(135deg, #FFFFFF 0%, #E5E5E5 100%);
+  --primary-glow: rgba(255, 255, 255, 0.15);
+
+  /* Secondary & Neutral Spectrum */
+  --secondary-color: #0A0A0A;
+  --secondary-soft: #1A1A1A;
+  --secondary-muted: #262626;
+
+  /* UI / Structural Colors */
+  --background-color: #0A0A0A;
+  --bg-alt: #111111;
+  --bg-deep: #000000;
+  --card-bg: #1A1A1A;
+  --card-hover: #262626;
+  --glass-overlay: rgba(0, 0, 0, 0.6);
+  --grain-overlay: rgba(255, 255, 255, 0.03);
+
+  --border-color: #2A2A2A;
+  --divider-color: #333333;
+  --gradient-divider: linear-gradient(90deg, transparent, #FFFFFF, transparent);
+
+  /* Typography System */
+  --text-color: #FAFAFA;
+  --text-secondary: #E5E5E5;
+  --text-muted: #A3A3A3;
+  --text-disabled: #737373;
+  --text-inverse: #0A0A0A;
+  --text-inverse-muted: #262626;
+  --text-light: #D4D4D4;
+
+  --link-color: #FFFFFF;
+  --link-hover: #D4D4D4;
+
+  /* Accent & CTA */
+  --accent-color: #FFFFFF;
+  --accent-soft: #2A2A2A;
+  --cta-color: #FFFFFF;
+  --cta-hover: #E5E5E5;
+  --cta-text: #0A0A0A;
+
+  /* Focus Ring */
+  --focus-ring: 0 0 0 3px rgba(255, 255, 255, 0.25);
+
+  /* Status Indicators (Dark Mode) */
+  --success-color: #22C55E;
+  --success-soft: #1A3A2A;
+  --warning-color: #EAB308;
+  --warning-soft: #3A3420;
+  --danger-color: #EF4444;
+  --danger-soft: #3A2020;
+
+  /* Effects */
+  --shadow-sm: 0 10px 30px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.7);
+  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.9);
+}
+
 * {
   box-sizing: border-box;
+}
+
+/* Smooth theme transition */
+*,
+*::before,
+*::after {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
 body {
@@ -144,32 +215,36 @@ a:hover {
 }
 
 .btn-primary {
-  background-color: var(--cta-color);
-  color: var(--cta-text) !important;
+  background-color: #FFFFFF;
+  /* Always white background */
+  color: #0A0A0A !important;
+  /* Always black text */
   box-shadow: var(--shadow-sm);
+  -webkit-text-fill-color: #0A0A0A;
 }
 
 .btn-primary:hover {
-  background-color: #333333;
-  /* Lighter black for effective hover */
+  background-color: #E5E5E5;
+  /* Slight gray on hover */
   box-shadow: var(--shadow-md);
 }
 
 .btn-secondary {
-  background-color: white;
-  color: var(--primary-color) !important;
-  border: 2px solid var(--primary-color);
+  background-color: transparent;
+  color: var(--text-color) !important;
+  border: 2px solid var(--border-color);
 }
 
 .btn-secondary:hover {
-  background-color: var(--primary-color);
-  color: white !important;
+  background-color: var(--card-hover);
+  border-color: var(--primary-color);
 }
 
 .btn-danger {
   background-color: var(--danger-color);
-  color: white;
+  color: white !important;
   border: 1px solid var(--danger-color);
+  -webkit-text-fill-color: white;
 }
 
 .btn-danger:hover {
