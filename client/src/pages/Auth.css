@@ -115,3 +115,10 @@
     margin-bottom: 1rem;
     animation: fadeIn 0.3s ease;
 }
+
+.btn-block {
+    width: 100%;
+    display: block;
+    margin-top: 1.5rem;
+    text-align: center;
+}

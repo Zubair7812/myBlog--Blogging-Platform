@@ -90,8 +90,6 @@ const Profile = () => {
                         <h3>CONTACTS</h3>
                         <div className="contact-info">
                             <p><i className="fas fa-envelope"></i> {profileData.email}</p>
-                            {/* Placeholder contact info as per design reference */}
-                            <p><i className="fas fa-phone"></i> +1 234 567 890</p>
                         </div>
 
                         <div className="social-links-sidebar">
