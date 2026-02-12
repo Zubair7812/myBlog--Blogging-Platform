@@ -51,7 +51,7 @@ const MainRoutes = () => {
   return (
     <div className="app-wrapper">
       <AnimatePresence mode="wait">
-        <Routes location={location} key={location.pathname}>
+        <Routes location={location} key={location.pathname.startsWith('/chat') ? 'chat' : location.pathname}>
           <Route path="/login" element={<PageTransition><Navbar /><Login /></PageTransition>} />
           <Route path="/register" element={<PageTransition><Navbar /><Register /></PageTransition>} />
           <Route path="/" element={<Navigate to="/home" />} />
