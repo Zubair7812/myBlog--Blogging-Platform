@@ -44,7 +44,7 @@ const Login = () => {
             await login(email, password);
             navigate('/home');
         } catch (err) {
-            setError(err.response?.data?.error || 'Failed to login');
+            setError(err.response?.data?.message || err.response?.data?.error || 'Failed to login');
         }
     };
 
@@ -55,12 +55,13 @@ const Login = () => {
                 {error && <div className="error-message">{error}</div>}
                 <form onSubmit={handleSubmit}>
                     <div className="form-group">
-                        <label>Email</label>
+                        <label>Email or Username</label>
                         <input
-                            type="email"
+                            type="text"
                             required
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
+                            placeholder="Enter email or username"
                         />
                     </div>
                     <div className="form-group">

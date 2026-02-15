@@ -18,14 +18,20 @@ router.get("/search", protect, async (req, res) => {
 
         if (filter === 'all' || filter === 'posts') {
             posts = await Blog.find({
-                title: { $regex: query, $options: "i" }
-            });
+                $or: [
+                    { title: { $regex: query, $options: "i" } },
+                    { content: { $regex: query, $options: "i" } }
+                ]
+            }).limit(20);
         }
 
         if (filter === 'all' || filter === 'people') {
             users = await User.find({
-                fullname: { $regex: query, $options: "i" }
-            });
+                $or: [
+                    { fullname: { $regex: query, $options: "i" } },
+                    { username: { $regex: query, $options: "i" } }
+                ]
+            }).limit(10);
         }
 
         res.json({

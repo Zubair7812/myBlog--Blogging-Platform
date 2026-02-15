@@ -1,10 +1,12 @@
+import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import ThemeToggle from './ThemeToggle';
 import './Navbar.css';
 
 const Navbar = () => {
-    const { user, logout } = useAuth();
+    const { user, logout, unreadChats, unreadNotifs } = useAuth();
     const navigate = useNavigate();
 
     const handleLogout = async () => {
@@ -24,15 +26,25 @@ const Navbar = () => {
                 <ul className="nav-links">
                     {!isAuthPage && (
                         <>
-                            <li><Link to="/home">Home</Link></li>
-                            <li><Link to="/search">Search</Link></li>
+                            <li><Link to="/home" className={location.pathname === '/home' ? 'active' : ''}>Home</Link></li>
+                            <li><Link to="/search" className={location.pathname === '/search' ? 'active' : ''}>Search</Link></li>
                         </>
                     )}
 
                     {user ? (
                         <>
-                            <li><Link to="/notifications">Notifications</Link></li>
-                            <li><Link to="/chat">Chat</Link></li>
+                            <li>
+                                <Link to="/notifications" className={`nav-link-item ${location.pathname === '/notifications' ? 'active' : ''}`}>
+                                    Notifications
+                                    {unreadNotifs > 0 && <span className="nav-badge">{unreadNotifs}</span>}
+                                </Link>
+                            </li>
+                            <li>
+                                <Link to="/chat" className={`nav-link-item ${location.pathname.startsWith('/chat') ? 'active' : ''}`}>
+                                    Chat
+                                    {unreadChats > 0 && <span className="nav-badge">{unreadChats}</span>}
+                                </Link>
+                            </li>
                             <li><Link to="/compose" className="btn btn-primary">Compose</Link></li>
                             <li>
                                 <Link to={`/profile/${user.username}`} className="nav-profile-link">

@@ -7,7 +7,7 @@ import './Chat.css';
 
 const Chat = () => {
     const { username } = useParams(); // target user for chat
-    const { user } = useAuth();
+    const { user, fetchUnreadCounts } = useAuth();
     const location = useLocation(); // Hook to get query params
     const navigate = useNavigate(); // Hook for navigation
     const [contacts, setContacts] = useState([]);
@@ -66,6 +66,7 @@ const Chat = () => {
 
                 // Mark as read
                 await axios.post('/api/chat/mark-read', { senderUsername: username });
+                fetchUnreadCounts(); // Update global unread count immediately
             } catch (err) {
                 console.error(err);
                 setError(err.response?.data?.error || "Failed to load chat");

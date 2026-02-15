@@ -54,20 +54,44 @@ router.get("/profile/:username", protect, async (req, res) => {
 });
 
 // Edit Profile Routes
+// Edit Profile Routes
 router.post("/editprofile/:username", protect, upload.single("image"), async (req, res) => {
     try {
+        const { fullname, username, bio, fb, tw, insta } = req.body;
+        const currentUser = await User.findById(req.user._id);
+
+        if (!currentUser) return res.status(404).json({ error: "User not found" });
+
+        // Check availability if username is changing
+        if (username && username !== currentUser.username) {
+            const existingUser = await User.findOne({ username });
+            if (existingUser) {
+                return res.status(400).json({ error: "Username already taken" });
+            }
+        }
+
         const updateData = {
-            fullname: req.body.fullname,
-            bio: req.body.bio,
-            facebook: req.body.fb,
-            twitter: req.body.tw,
-            instagram: req.body.insta
+            name: fullname || currentUser.name, // Keep name in sync
+            fullname: fullname || currentUser.fullname,
+            username: username || currentUser.username,
+            bio: bio,
+            facebook: fb,
+            twitter: tw,
+            instagram: insta
         };
         if (req.file) updateData.dp = req.file.filename;
 
-        await User.findOneAndUpdate({ username: req.user.username }, updateData);
-        res.json({ message: "Profile updated" });
+        const updatedUser = await User.findByIdAndUpdate(req.user._id, updateData, { new: true });
+
+        // If username changed, update all Blogs and Comments by this user
+        if (username && username !== currentUser.username) {
+            await Blog.updateMany({ author: currentUser.username }, { author: username });
+            await Comment.updateMany({ username: currentUser.username }, { username: username });
+        }
+
+        res.json({ message: "Profile updated", user: updatedUser });
     } catch (err) {
+        console.log(err);
         res.status(500).json({ error: "Error updating profile" });
     }
 });

@@ -6,20 +6,28 @@ const User = require('../models/User');
 // @desc    Register new user
 // @route   POST /api/auth/register
 // @access  Public
+// @desc    Register new user
+// @route   POST /api/auth/register
+// @access  Public
 const registerUser = asyncHandler(async (req, res) => {
-    const { name, email, password } = req.body;
+    const { username, fullname, email, password } = req.body;
 
-    if (!name || !email || !password) {
+    if (!username || !fullname || !email || !password) {
         res.status(400);
         throw new Error('Please add all fields');
     }
 
-    // Check if user exists
-    const userExists = await User.findOne({ email });
+    // Check if user exists (email or username)
+    const userExists = await User.findOne({
+        $or: [
+            { email: email.toLowerCase() },
+            { username: username }
+        ]
+    });
 
     if (userExists) {
         res.status(400);
-        throw new Error('User already exists');
+        throw new Error('User already exists (Email or Username taken)');
     }
 
     // Hash password
@@ -28,11 +36,11 @@ const registerUser = asyncHandler(async (req, res) => {
 
     // Create user
     const user = await User.create({
-        name,
+        name: fullname, // Map fullname to 'name' for backward compatibility
+        fullname,      // Store explicitly too
+        username,
         email,
-        password: hashedPassword,
-        username: name, // Maintain backward compatibility
-        fullname: name // Maintain backward compatibility
+        password: hashedPassword
     });
 
     if (user) {
@@ -55,9 +63,24 @@ const registerUser = asyncHandler(async (req, res) => {
 // @access  Public
 const loginUser = asyncHandler(async (req, res) => {
     const { email, password } = req.body;
+    const identifier = email ? email.trim() : '';
 
-    // Check for user email
-    const user = await User.findOne({ email });
+    console.log('Login attempt with identifier:', identifier);
+
+    // Check for user by email OR username
+    const user = await User.findOne({
+        $or: [
+            { email: identifier.toLowerCase() },
+            { username: identifier } // Exact match for username, or we could use regex for case-insensitive
+            // { username: new RegExp(`^${identifier}$`, 'i') } 
+        ]
+    });
+
+    if (!user) {
+        console.log('User not found for identifier:', identifier);
+    } else {
+        console.log('User found:', user.username);
+    }
 
     if (user && (await bcrypt.compare(password, user.password))) {
         res.json({

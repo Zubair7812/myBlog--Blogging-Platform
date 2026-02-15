@@ -117,7 +117,8 @@
 
 .social-icon:hover {
     background: white;
-    color: var(--primary-color);
+    color: #0A0A0A;
+    /* Always black on white background */
 }
 
 .profile-actions-sidebar {
@@ -250,9 +251,21 @@
 }
 
 .btn-readmore:hover {
-    background-color: #E5E5E5;
-    /* Light gray on hover */
+    background-color: var(--primary-color);
+    /* High contrast on hover */
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF;
+    box-shadow: var(--shadow-md);
+}
+
+/* Dark Mode Override for Read More Button */
+[data-theme="dark"] .btn-readmore:hover {
+    background-color: #D4D4D4;
+    /* Silver */
     color: #0A0A0A !important;
+    /* Keep text black */
+    -webkit-text-fill-color: #0A0A0A;
+    /* Soft Glow */
 }
 
 @media (max-width: 900px) {

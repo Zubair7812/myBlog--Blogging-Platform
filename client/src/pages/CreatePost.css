@@ -37,7 +37,10 @@
     border: 1px solid var(--border-color);
     border-radius: 0.5rem;
     font-size: 1rem;
-    background-color: #f8fafc;
+    background-color: var(--bg-alt);
+    /* Theme aware */
+    color: var(--text-color);
+    /* Explicitly set text color */
     transition: var(--transition);
     font-family: inherit;
 }
@@ -47,8 +50,27 @@
     outline: none;
     border-color: var(--primary-color);
     box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
-    background-color: white;
+    background-color: var(--card-bg);
+    /* Theme aware */
 }
+
+/* Texture Wrapper for positioning Emoji Button */
+.textarea-wrapper {
+    position: relative;
+}
+
+.emoji-btn-pos {
+    position: absolute;
+    bottom: 12px;
+    right: 12px;
+    z-index: 10;
+}
+
+/* Ensure text doesn't overlap with emoji button */
+.create-post-form textarea {
+    padding-right: 3rem;
+}
+
 
 .create-post-form input[type="file"] {
     width: 100%;
@@ -56,13 +78,16 @@
     border: 2px dashed var(--border-color);
     border-radius: 0.5rem;
     cursor: pointer;
-    background-color: #f8fafc;
+    background-color: var(--bg-alt);
+    /* Theme aware */
+    color: var(--text-color);
     transition: var(--transition);
 }
 
 .create-post-form input[type="file"]:hover {
     border-color: var(--primary-color);
-    background-color: #eef2ff;
+    background-color: var(--card-hover);
+    /* Theme aware */
 }
 
 .create-post-form button[type="submit"] {

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
+import { formatDistanceToNow } from 'date-fns';
 import './Profile.css';
 
 const Profile = () => {
@@ -91,8 +92,9 @@ const Profile = () => {
                         />
                     </div>
 
-                    <h2 className="profile-name">{profileData.fullname || profileData.username}</h2>
-                    <p className="profile-welcome">Welcome to my profile!!!</p>
+                    <h2 className="profile-name">{profileData.fullname || profileData.name}</h2>
+                    <p className="profile-username" style={{ color: '#666', fontSize: '0.9rem', marginBottom: '1rem' }}>@{profileData.username}</p>
+                    <p className="profile-welcome">{profileData.bio || "Welcome to my profile!!!"}</p>
 
                     <div className="profile-stats-box">
                         <div className="stat">
@@ -149,18 +151,18 @@ const Profile = () => {
                                 onError={(e) => { e.target.src = 'https://via.placeholder.com/400x250' }}
                             />
                             <div className="post-card-body">
-                                <span className="post-time">10 days ago</span>
+                                <span className="post-time">{formatDistanceToNow(new Date(post.date), { addSuffix: true })}</span>
                                 <h3 className="post-card-title">
-                                    <Link to={`/posts/${post._id}`}>{post.title}</Link>
+                                    <Link to={`/posts/${post._id}`} className="hover-underline">{post.title}</Link>
                                 </h3>
                                 <p className="post-card-excerpt">
                                     {post.content.substring(0, 100)}...
                                 </p>
                                 <div className="post-card-footer">
                                     <span className="post-likes">
-                                        <i className="fas fa-heart"></i> {post.like.length}
+                                        <i className="fas fa-heart"></i> {post.like}
                                     </span>
-                                    <Link to={`/posts/${post._id}`} className="btn btn-readmore">ReadMore</Link>
+                                    <Link to={`/posts/${post._id}`} className="btn btn-readmore">Read More</Link>
                                 </div>
                             </div>
                         </div>

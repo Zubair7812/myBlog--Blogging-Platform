@@ -4,7 +4,8 @@ import { useAuth } from '../context/AuthContext';
 import './Auth.css';
 
 const Register = () => {
-    const [name, setName] = useState('');
+    const [username, setUsername] = useState('');
+    const [fullname, setFullname] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -40,7 +41,7 @@ const Register = () => {
         e.preventDefault();
         setError('');
         try {
-            await signup(name, email, password);
+            await signup(username, fullname, email, password);
             navigate('/home');
         } catch (err) {
             setError(err.response?.data?.error || 'Failed to register');
@@ -54,12 +55,23 @@ const Register = () => {
                 {error && <div className="error-message">{error}</div>}
                 <form onSubmit={handleSubmit}>
                     <div className="form-group">
-                        <label>Username</label>
+                        <label>Username (Handle)</label>
                         <input
                             type="text"
                             required
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                            placeholder="e.g. johndoe123"
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label>Full Name</label>
+                        <input
+                            type="text"
+                            required
+                            value={fullname}
+                            onChange={(e) => setFullname(e.target.value)}
+                            placeholder="e.g. John Doe"
                         />
                     </div>
                     <div className="form-group">
@@ -76,7 +88,7 @@ const Register = () => {
                         <input
                             type="password"
                             required
-                            valid={password}
+                            value={password}
                             onChange={(e) => setPassword(e.target.value)}
                         />
                     </div>

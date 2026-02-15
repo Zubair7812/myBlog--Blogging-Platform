@@ -8,10 +8,35 @@ export const useAuth = () => useContext(AuthContext);
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [unreadChats, setUnreadChats] = useState(0);
+    const [unreadNotifs, setUnreadNotifs] = useState(0);
 
     useEffect(() => {
         checkAuth();
     }, []);
+
+    const fetchUnreadCounts = async () => {
+        if (!user) return;
+        try {
+            const chatRes = await axios.get('/api/chat/unread-count');
+            const notifRes = await axios.get('/api/notifications/unread');
+            setUnreadChats(chatRes.data.count || 0);
+            setUnreadNotifs(notifRes.data.count || 0);
+        } catch (err) {
+            console.error("Failed to fetch unread counts", err);
+        }
+    };
+
+    useEffect(() => {
+        if (user) {
+            fetchUnreadCounts();
+            const interval = setInterval(fetchUnreadCounts, 5000);
+            return () => clearInterval(interval);
+        } else {
+            setUnreadChats(0);
+            setUnreadNotifs(0);
+        }
+    }, [user]);
 
     const checkAuth = async () => {
         const token = localStorage.getItem('token');
@@ -40,8 +65,8 @@ export const AuthProvider = ({ children }) => {
         return res.data;
     };
 
-    const signup = async (name, email, password) => {
-        const res = await axios.post('/api/auth/register', { name, email, password });
+    const signup = async (username, fullname, email, password) => {
+        const res = await axios.post('/api/auth/register', { username, fullname, email, password });
         localStorage.setItem('token', res.data.token);
         axios.defaults.headers.common['Authorization'] = `Bearer ${res.data.token}`;
         setUser(res.data);
@@ -52,10 +77,22 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem('token');
         delete axios.defaults.headers.common['Authorization'];
         setUser(null);
+        setUnreadChats(0);
+        setUnreadNotifs(0);
     };
 
     return (
-        <AuthContext.Provider value={{ user, loading, login, signup, logout, checkAuth }}>
+        <AuthContext.Provider value={{
+            user,
+            loading,
+            login,
+            signup,
+            logout,
+            checkAuth,
+            unreadChats,
+            unreadNotifs,
+            fetchUnreadCounts
+        }}>
             {children}
         </AuthContext.Provider>
     );

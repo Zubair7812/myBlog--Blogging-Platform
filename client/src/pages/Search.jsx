@@ -1,45 +1,92 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import axios from 'axios';
+import { formatDistanceToNow } from 'date-fns';
 import './Search.css';
 
 const Search = () => {
     const [searchParams, setSearchParams] = useSearchParams();
-    const query = searchParams.get('q') || '';
+    const initialQuery = searchParams.get('q') || '';
     const initialFilter = searchParams.get('filter') || 'all';
 
+    const [query, setQuery] = useState(initialQuery);
     const [filter, setFilter] = useState(initialFilter);
     const [results, setResults] = useState({ posts: [], users: [] });
     const [loading, setLoading] = useState(false);
 
+    // Debounce Search
     useEffect(() => {
-        const fetchResults = async () => {
-            if (!query) return;
-            setLoading(true);
-            try {
-                const res = await axios.get(`/api/search?q=${query}&filter=${filter}`);
-                setResults({
-                    posts: res.data.posts || [],
-                    users: res.data.users || []
-                });
-            } catch (err) {
-                console.error(err);
-            } finally {
-                setLoading(false);
+        const delayDebounceFn = setTimeout(() => {
+            if (query) {
+                fetchResults();
+                setSearchParams({ q: query, filter });
+            } else {
+                setResults({ posts: [], users: [] });
+                setSearchParams({});
             }
-        };
+        }, 300); // 300ms debounce
 
-        fetchResults();
+        return () => clearTimeout(delayDebounceFn);
     }, [query, filter]);
+
+    const fetchResults = async () => {
+        setLoading(true);
+        try {
+            const res = await axios.get(`/api/search?q=${query}&filter=${filter}`);
+            setResults({
+                posts: res.data.posts || [],
+                users: res.data.users || []
+            });
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleFilterChange = (newFilter) => {
         setFilter(newFilter);
-        setSearchParams({ q: query, filter: newFilter });
+    };
+
+    // Helper to highlight text
+    const HighlightText = ({ text, highlight }) => {
+        if (!highlight.trim()) {
+            return <span>{text}</span>;
+        }
+        const regex = new RegExp(`(${highlight})`, 'gi');
+        const parts = text.split(regex);
+
+        return (
+            <span>
+                {parts.map((part, i) =>
+                    regex.test(part) ? (
+                        <span key={i} className="highlight">{part}</span>
+                    ) : (
+                        <span key={i}>{part}</span>
+                    )
+                )}
+            </span>
+        );
     };
 
     return (
         <div className="container search-container">
-            <h1 className="search-title">Search Results for "{query}"</h1>
+            <div className="search-header">
+                <h1>Search</h1>
+                <div className="search-bar-wrapper">
+                    <div className="search-input-group">
+                        <i className="fas fa-search search-icon"></i>
+                        <input
+                            type="text"
+                            className="search-input"
+                            placeholder="Search posts, people, tags..."
+                            value={query}
+                            onChange={(e) => setQuery(e.target.value)}
+                            autoFocus
+                        />
+                    </div>
+                </div>
+            </div>
 
             <div className="search-tabs">
                 <button
@@ -62,26 +109,26 @@ const Search = () => {
                 </button>
             </div>
 
-            {loading ? (
-                <div className="loading">Searching...</div>
-            ) : (
+            {loading && <div className="loading" style={{ textAlign: 'center', margin: '2rem' }}>Searching...</div>}
+
+            {!loading && (
                 <div className="search-results">
                     {(filter === 'all' || filter === 'people') && results.users.length > 0 && (
                         <div className="results-section">
                             <h2>People</h2>
                             <div className="users-grid">
                                 {results.users.map(user => (
-                                    <div key={user._id} className="user-card-search">
+                                    <Link to={`/profile/${user.username}`} key={user._id} className="user-card-search">
                                         <img
                                             src={user.dp ? `/thumbnails/${user.dp}` : '/thumbnails/default-user.jpg'}
                                             alt={user.username}
-                                            onError={(e) => { e.target.src = 'https://via.placeholder.com/50' }}
+                                            onError={(e) => { e.target.src = 'https://via.placeholder.com/60' }}
                                         />
                                         <div className="user-info">
-                                            <Link to={`/profile/${user.username}`}><h3>{user.fullname}</h3></Link>
-                                            <p>@{user.username}</p>
+                                            <h3><HighlightText text={user.fullname} highlight={query} /></h3>
+                                            <p>@<HighlightText text={user.username} highlight={query} /></p>
                                         </div>
-                                    </div>
+                                    </Link>
                                 ))}
                             </div>
                         </div>
@@ -91,19 +138,36 @@ const Search = () => {
                         <div className="results-section">
                             <h2>Posts</h2>
                             <div className="posts-list">
-                                {results.posts.map(post => (
-                                    <div key={post._id} className="post-item-search">
-                                        <Link to={`/posts/${post._id}`}><h3>{post.title}</h3></Link>
-                                        <p>{post.content.replace(/<[^>]*>?/gm, '').substring(0, 100)}...</p>
-                                        <small>By {post.author}</small>
-                                    </div>
-                                ))}
+                                {results.posts.map(post => {
+                                    // Construct plain text excerpt for searching/highlighting
+                                    const plainContent = post.content.replace(/<[^>]*>?/gm, '');
+                                    const excerpt = plainContent.substring(0, 150) + '...';
+
+                                    return (
+                                        <Link
+                                            to={`/posts/${post._id}`}
+                                            key={post._id}
+                                            className="post-item-search"
+                                            style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}
+                                        >
+                                            <h3>
+                                                <HighlightText text={post.title} highlight={query} />
+                                            </h3>
+                                            <p className="post-excerpt">
+                                                <HighlightText text={excerpt} highlight={query} />
+                                            </p>
+                                            <div className="post-meta">
+                                                By {post.author} • {formatDistanceToNow(new Date(post.date), { addSuffix: true })}
+                                            </div>
+                                        </Link>
+                                    );
+                                })}
                             </div>
                         </div>
                     )}
 
-                    {results.posts.length === 0 && results.users.length === 0 && (
-                        <p className="no-results">No results found.</p>
+                    {!loading && query && results.posts.length === 0 && results.users.length === 0 && (
+                        <p className="no-results">No results found for "{query}"</p>
                     )}
                 </div>
             )}

@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import './Notifications.css';
 
 const Notifications = () => {
+    const { fetchUnreadCounts } = useAuth();
     const [notifications, setNotifications] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -12,6 +14,7 @@ const Notifications = () => {
             try {
                 const res = await axios.get('/api/notifications');
                 setNotifications(res.data.notifications);
+                fetchUnreadCounts(); // Update global unread count immediately
             } catch (err) {
                 console.error(err);
             } finally {

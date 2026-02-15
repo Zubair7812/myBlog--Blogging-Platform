@@ -4,7 +4,10 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import ShareBlogModal from '../components/ShareBlogModal';
 import EmojiPickerButton from '../components/EmojiPickerButton';
+import AutoResizeTextarea from '../components/AutoResizeTextarea';
 import './PostDetail.css';
+
+import { formatDistanceToNow } from 'date-fns';
 
 const PostDetail = () => {
     const { id } = useParams();
@@ -85,9 +88,9 @@ const PostDetail = () => {
                 <h1>{post.title}</h1>
                 <div className="post-meta-row">
                     <span className="meta-author">
-                        By <Link to={`/profile/${post.author}`}>{post.author}</Link>
+                        By <Link to={`/profile/${post.author}`} className="hover-underline">{post.author}</Link>
                     </span>
-                    <span className="meta-date">{new Date(post.date).toLocaleDateString()}</span>
+                    <span className="meta-date">{formatDistanceToNow(new Date(post.date), { addSuffix: true })}</span>
                 </div>
 
                 <div className="post-interaction-bar">
@@ -140,12 +143,12 @@ const PostDetail = () => {
                 {user && (
                     <form onSubmit={handleComment} className="comment-form">
                         <div className="comment-input-wrapper">
-                            <textarea
+                            <AutoResizeTextarea
                                 value={commentText}
                                 onChange={(e) => setCommentText(e.target.value)}
                                 placeholder="Add a comment..."
-                                rows="3"
-                            ></textarea>
+                                minRows={3}
+                            />
                             <div className="comment-emoji-btn">
                                 <EmojiPickerButton onEmojiClick={(emoji) => setCommentText(prev => prev + emoji)} />
                             </div>
@@ -157,9 +160,13 @@ const PostDetail = () => {
                 <div className="comments-list">
                     {comments.map(comment => (
                         <div key={comment._id} className="comment-item">
-                            <strong>{comment.username}</strong>
+                            <strong>
+                                <Link to={`/profile/${comment.username}`} className="hover-underline" style={{ color: 'inherit' }}>
+                                    {comment.username}
+                                </Link>
+                            </strong>
                             <p>{comment.content}</p>
-                            <small>{new Date(comment.date).toLocaleDateString()}</small>
+                            <small>{formatDistanceToNow(new Date(comment.date), { addSuffix: true })}</small>
                         </div>
                     ))}
                 </div>

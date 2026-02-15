@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import AutoResizeTextarea from '../components/AutoResizeTextarea';
+import EmojiPickerButton from '../components/EmojiPickerButton';
 import './CreatePost.css';
 
 const CreatePost = () => {
@@ -63,13 +65,18 @@ const CreatePost = () => {
                 </div>
                 <div className="form-group">
                     <label>Content</label>
-                    <textarea
-                        required
-                        value={content}
-                        onChange={(e) => setContent(e.target.value)}
-                        rows="10"
-                        placeholder="Write your post content here..."
-                    ></textarea>
+                    <div className="textarea-wrapper">
+                        <AutoResizeTextarea
+                            required
+                            value={content}
+                            onChange={(e) => setContent(e.target.value)}
+                            minRows={10}
+                            placeholder="Write your post content here..."
+                        />
+                        <div className="emoji-btn-pos">
+                            <EmojiPickerButton onEmojiClick={(emoji) => setContent(prev => prev + emoji)} />
+                        </div>
+                    </div>
                 </div>
                 <button type="submit" className="btn btn-primary" disabled={loading}>
                     {loading ? 'Publishing...' : 'Publish Post'}

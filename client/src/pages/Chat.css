@@ -92,7 +92,7 @@
 
 .unread-badge {
     background-color: var(--accent-color);
-    color: white;
+    color: var(--text-inverse);
     font-size: 0.75rem;
     font-weight: 700;
     padding: 0.2rem 0.5rem;

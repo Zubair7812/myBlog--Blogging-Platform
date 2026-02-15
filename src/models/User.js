@@ -1,9 +1,16 @@
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
+    // Full Name
     name: {
         type: String,
         required: [true, 'Please add a name']
+    },
+    // Login Handle
+    username: {
+        type: String,
+        required: [true, 'Please add a username'],
+        unique: true
     },
     email: {
         type: String,
@@ -20,9 +27,7 @@ const userSchema = new mongoose.Schema({
         required: [true, 'Please add a password'],
         minlength: 6
     },
-    // Keep existing fields for backward compatibility if needed, or remove if strict strict Phase 2 only
-    username: { type: String }, // Mapped from name if needed or kept for old data
-    fullname: String,
+    fullname: String, // Deprecated in favor of 'name', but keeping for now or mapping. PROPOSAL: Use 'name' as Full Name and 'username' as Handle. 
     dp: String,
     bio: String,
     weblink: String,

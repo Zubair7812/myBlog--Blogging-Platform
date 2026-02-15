@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
+import AutoResizeTextarea from '../components/AutoResizeTextarea';
 import './CreatePost.css'; // Reuse form styles
 
 const EditProfile = () => {
@@ -10,6 +11,7 @@ const EditProfile = () => {
     const navigate = useNavigate();
 
     const [fullname, setFullname] = useState('');
+    const [usernameInput, setUsernameInput] = useState('');
     const [bio, setBio] = useState('');
     const [fb, setFb] = useState('');
     const [tw, setTw] = useState('');
@@ -30,7 +32,8 @@ const EditProfile = () => {
             try {
                 const res = await axios.get(`/api/profile/${username}`);
                 const data = res.data.userdata;
-                setFullname(data.fullname || '');
+                setFullname(data.fullname || data.name || '');
+                setUsernameInput(data.username || '');
                 setBio(data.bio || '');
                 setFb(data.facebook || '');
                 setTw(data.twitter || '');
@@ -52,6 +55,7 @@ const EditProfile = () => {
 
         const formData = new FormData();
         formData.append('fullname', fullname);
+        formData.append('username', usernameInput);
         formData.append('bio', bio);
         formData.append('fb', fb);
         formData.append('tw', tw);
@@ -61,13 +65,20 @@ const EditProfile = () => {
         }
 
         try {
-            await axios.post(`/api/editprofile/${username}`, formData, {
+            const res = await axios.post(`/api/editprofile/${username}`, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
-            navigate(`/profile/${username}`);
+            // If username changed, redirect to new profile
+            if (res.data.user && res.data.user.username !== username) {
+                navigate(`/profile/${res.data.user.username}`);
+                // Force reload to update auth context or manual update might be needed
+                window.location.reload();
+            } else {
+                navigate(`/profile/${username}`);
+            }
         } catch (err) {
             console.error(err);
-            setError('Failed to update profile');
+            setError(err.response?.data?.error || 'Failed to update profile');
             setLoading(false);
         }
     };
@@ -79,6 +90,15 @@ const EditProfile = () => {
             <h1>Edit Public Profile</h1>
             {error && <div className="error-message">{error}</div>}
             <form onSubmit={handleSubmit} className="create-post-form">
+                <div className="form-group">
+                    <label>Username</label>
+                    <input
+                        type="text"
+                        value={usernameInput}
+                        onChange={(e) => setUsernameInput(e.target.value)}
+                        required
+                    />
+                </div>
                 <div className="form-group">
                     <label>Full Name</label>
                     <input
@@ -97,12 +117,12 @@ const EditProfile = () => {
                 </div>
                 <div className="form-group">
                     <label>Bio</label>
-                    <textarea
+                    <AutoResizeTextarea
                         value={bio}
                         onChange={(e) => setBio(e.target.value)}
-                        rows="4"
+                        minRows={4}
                         placeholder="Tell the world about yourself..."
-                    ></textarea>
+                    />
                 </div>
 
                 <h3 style={{ margin: '1.5rem 0 1rem', borderBottom: '1px solid #eee', paddingBottom: '0.5rem' }}>Social Links</h3>

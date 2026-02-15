@@ -4,6 +4,8 @@ import axios from 'axios';
 import './Home.css';
 import '../pages/Profile.css'; // Import Profile CSS to reuse card styles
 
+import { formatDistanceToNow } from 'date-fns';
+
 const Home = () => {
     const [posts, setPosts] = useState([]);
     const [trending, setTrending] = useState([]);
@@ -42,19 +44,19 @@ const Home = () => {
                             />
                             <div className="post-card-body">
                                 <span className="post-time author-tag">
-                                    By <Link to={`/profile/${post.author}`}>{post.author}</Link> • 10h ago
+                                    By <Link to={`/profile/${post.author}`} className="hover-underline">{post.author}</Link> • {formatDistanceToNow(new Date(post.date), { addSuffix: true })}
                                 </span>
                                 <h3 className="post-card-title">
-                                    <Link to={`/posts/${post._id}`}>{post.title}</Link>
+                                    <Link to={`/posts/${post._id}`} className="hover-underline">{post.title}</Link>
                                 </h3>
                                 <p className="post-card-excerpt">
                                     {post.content.substring(0, 120)}...
                                 </p>
                                 <div className="post-card-footer">
                                     <span className="post-likes">
-                                        <i className="fas fa-heart"></i> {post.like.length}
+                                        <i className="fas fa-heart"></i> {post.like}
                                     </span>
-                                    <Link to={`/posts/${post._id}`} className="btn btn-readmore">ReadMore</Link>
+                                    <Link to={`/posts/${post._id}`} className="btn btn-readmore">Read More</Link>
                                 </div>
                             </div>
                         </div>
@@ -66,12 +68,12 @@ const Home = () => {
                 <div className="sidebar-card">
                     <h3>Top Trending</h3>
                     <ul className="trending-list-vibrant">
-                        {trending.slice(0, 5).map(post => (
+                        {trending.slice(0, 5).map((post, index) => (
                             <li key={post._id} className="trending-item-vibrant">
-                                <span className="trend-number">#</span>
+                                <span className="trend-number">#{index + 1}</span>
                                 <div className="trend-info">
-                                    <Link to={`/posts/${post._id}`}>{post.title}</Link>
-                                    <span className="trend-likes">{post.like.length} Likes</span>
+                                    <Link to={`/posts/${post._id}`} className="hover-underline">{post.title}</Link>
+                                    <span className="trend-likes">{post.like} Likes</span>
                                 </div>
                             </li>
                         ))}
