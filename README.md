@@ -114,23 +114,23 @@ Visit `http://localhost:5173` in your browser to start blogging!
 ### 🌗 Stunning Visual Aesthetics
 Carefully crafted monochrome design elements, crisp typography, and seamless Dark/Light mode toggles that provide a premium reading experience regardless of your environment. Notice the striking contrast between the Dark and Light mode themes below:
 
-![Home Page - Dark Theme](/screenshots/Home%20Page.JPG)
-![Home Page - Light Theme](/screenshots/Light.JPG)
+![Home Page - Dark Theme](client/public/screenshots/Home%20Page.JPG)
+![Home Page - Light Theme](client/public/screenshots/Light.JPG)
 
 ### 🔍 Intuitive Content Discovery
 Quickly find the content and authors you love using the debounced, real-time search interface tracking posts and profiles seamlessly.
 
-![Real-time Search Interface](/screenshots/Search.JPG)
+![Real-time Search Interface](client/public/screenshots/Search.JPG)
 
 ### 💬 Integrated Social Experience & Notifications
 More than just a blog—connect directly with authors through a fully-integrated real-time chat architecture, complete with unread notification badges and instant message delivery.
 
-![Notifications & Social Stats](/screenshots/Notification%20Page.JPG)
+![Notifications & Social Stats](client/public/screenshots/Notification%20Page.JPG)
 
 ### 👤 Comprehensive User Profiles
 Engineered to perform beautifully on any device. Personalize your feed and track your progress through detailed user profiles containing follower stats and dynamic posts arrays.
 
-![Dynamic User Profiles](/screenshots/Profile%20Page.JPG)
+![Dynamic User Profiles](client/public/screenshots/Profile%20Page.JPG)
 ## 🤝 Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
