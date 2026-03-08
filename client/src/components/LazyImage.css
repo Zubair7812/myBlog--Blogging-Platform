@@ -1,0 +1,65 @@
+.lazy-image-wrapper {
+    position: relative;
+    overflow: hidden;
+    background-color: var(--secondary-muted);
+    /* Placeholder color */
+    width: 100%;
+    display: flex; /* Changed from block to flex to center content */
+    align-items: center;
+    justify-content: center;
+    object-fit: cover; /* default object fit for children to inherit */
+}
+
+/* Add a subtle default user icon to the wrapper using a font-awesome style or CSS shapes */
+.lazy-image-wrapper:empty::after,
+.lazy-image-wrapper:not(:has(img, .lazy-image-skeleton))::after {
+    content: '\f007'; /* FontAwesome user icon unicode */
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    color: var(--text-muted);
+    font-size: 50%; /* Scale with container */
+    opacity: 0.5;
+    position: absolute;
+}
+
+.lazy-image-skeleton {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg,
+            var(--secondary-muted) 25%,
+            var(--secondary-soft) 50%,
+            var(--secondary-muted) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    z-index: 1;
+}
+
+.lazy-image {
+    width: 100%;
+    height: 100%;
+    object-fit: inherit; /* Allow wrapper to dictate fit if needed */
+    border-radius: inherit; /* inherit roundness from wrapper */
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 2;
+}
+
+.lazy-image.loaded {
+    opacity: 1;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}

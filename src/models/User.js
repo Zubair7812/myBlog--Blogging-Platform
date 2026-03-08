@@ -41,7 +41,8 @@ const userSchema = new mongoose.Schema({
         default: 'user'
     },
     followers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-    following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
+    following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    bookmarks: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Blog' }]
 }, { timestamps: true });
 
 const User = mongoose.model('User', userSchema);

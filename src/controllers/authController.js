@@ -6,9 +6,6 @@ const User = require('../models/User');
 // @desc    Register new user
 // @route   POST /api/auth/register
 // @access  Public
-// @desc    Register new user
-// @route   POST /api/auth/register
-// @access  Public
 const registerUser = asyncHandler(async (req, res) => {
     const { username, fullname, email, password } = req.body;
 
@@ -50,6 +47,7 @@ const registerUser = asyncHandler(async (req, res) => {
             email: user.email,
             username: user.username,
             dp: user.dp,
+            bookmarks: user.bookmarks,
             token: generateToken(user._id)
         });
     } else {
@@ -65,8 +63,6 @@ const loginUser = asyncHandler(async (req, res) => {
     const { email, password } = req.body;
     const identifier = email ? email.trim() : '';
 
-    console.log('Login attempt with identifier:', identifier);
-
     // Check for user by email OR username
     const user = await User.findOne({
         $or: [
@@ -75,12 +71,6 @@ const loginUser = asyncHandler(async (req, res) => {
             // { username: new RegExp(`^${identifier}$`, 'i') } 
         ]
     });
-
-    if (!user) {
-        console.log('User not found for identifier:', identifier);
-    } else {
-        console.log('User found:', user.username);
-    }
 
     if (user && (await bcrypt.compare(password, user.password))) {
         res.json({

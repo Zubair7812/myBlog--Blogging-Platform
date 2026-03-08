@@ -22,7 +22,8 @@ const blogSchema = new mongoose.Schema({
     date: {
         type: Date,
         default: Date.now
-    }
+    },
+    tags: [String]
 }, { collection: 'Blogs', timestamps: true });
 
 const Blog = mongoose.model('Blog', blogSchema);

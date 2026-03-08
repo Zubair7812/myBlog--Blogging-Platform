@@ -31,11 +31,12 @@
 }
 
 .profile-avatar-large {
-    width: 140px;
-    height: 140px;
+    width: 140px !important;
+    height: 140px !important;
     border-radius: 50%;
     object-fit: cover;
     border: 5px solid rgba(255, 255, 255, 0.2);
+    margin: 0 auto;
 }
 
 .profile-name {
@@ -138,10 +139,45 @@
     -webkit-text-fill-color: #0A0A0A;
 }
 
-.btn-edit-profile:hover {
-    background-color: #E5E5E5;
-    color: #0A0A0A !important;
-    box-shadow: var(--shadow-md);
+
+
+.profile-tabs {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.5rem;
+}
+
+.profile-tab {
+    background: none;
+    border: none;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s;
+}
+
+.profile-tab:hover {
+    color: var(--text-color);
+}
+
+.profile-tab.active {
+    color: var(--text-color);
+}
+
+.profile-tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: -0.6rem;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: var(--text-color);
+    border-radius: 99px;
 }
 
 
@@ -167,6 +203,30 @@
     border: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
+    position: relative;
+    /* Ensure relative positioning for absolute children */
+}
+
+.card-actions-top {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 10;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(4px);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card-actions-top:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .post-card-visual:hover {
@@ -256,6 +316,51 @@
     color: #FFFFFF !important;
     -webkit-text-fill-color: #FFFFFF;
     box-shadow: var(--shadow-md);
+}
+
+.btn-edit-profile:hover {
+    background-color: #E5E5E5;
+    color: #0A0A0A !important;
+    box-shadow: var(--shadow-md);
+}
+
+.profile-tabs {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.5rem;
+}
+
+.profile-tab {
+    background: none;
+    border: none;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s;
+}
+
+.profile-tab:hover {
+    color: var(--text-color);
+}
+
+.profile-tab.active {
+    color: var(--text-color);
+}
+
+.profile-tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: -0.6rem;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: var(--text-color);
+    border-radius: 99px;
 }
 
 /* Dark Mode Override for Read More Button */

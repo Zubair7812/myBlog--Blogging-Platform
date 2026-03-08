@@ -100,7 +100,20 @@
 
 .post-body p {
     margin-bottom: 2rem;
+    white-space: pre-wrap;
 }
+
+.post-body h1, .post-body h2, .post-body h3, .post-body h4, .post-body h5, .post-body h6 {
+    color: var(--text-color);
+    margin-top: 2.5rem;
+    margin-bottom: 1rem;
+    font-weight: 700;
+}
+
+.post-body h1 { font-size: 2.2rem; }
+.post-body h2 { font-size: 1.8rem; }
+.post-body h3 { font-size: 1.5rem; }
+.post-body h4 { font-size: 1.25rem; }
 
 /* Interaction Section */
 .interaction-section {
@@ -189,6 +202,30 @@
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
+}
+
+.post-tags {
+    margin-top: 2rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.post-tag {
+    background: var(--bg-deep);
+    color: var(--text-muted);
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    text-decoration: none;
+    transition: all 0.2s;
+    border: 1px solid var(--border-color);
+}
+
+.post-tag:hover {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
 }
 
 .comment-item {

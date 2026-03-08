@@ -1,14 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
-import { useParams, Link, useLocation, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import EmojiPickerButton from '../components/EmojiPickerButton';
+import LazyImage from '../components/LazyImage';
 import './Chat.css';
 
 const Chat = () => {
     const { username } = useParams(); // target user for chat
-    const { user, fetchUnreadCounts } = useAuth();
-    const location = useLocation(); // Hook to get query params
+    const { fetchUnreadCounts } = useAuth();
     const navigate = useNavigate(); // Hook for navigation
     const [contacts, setContacts] = useState([]);
     const [messages, setMessages] = useState([]);
@@ -46,9 +46,7 @@ const Chat = () => {
 
         const fetchChat = async () => {
             try {
-                // console.log(`Fetching chat for: ${username}`);
                 const res = await axios.get(`/api/chat/${username}`);
-                // console.log("Chat data:", res.data);
                 if (res.data.activeChat) {
                     setActiveChatUser(res.data.activeChat);
                     setMessages(res.data.messages);
@@ -74,17 +72,9 @@ const Chat = () => {
         };
 
         fetchChat();
-    }, [username]);
+    }, [username, fetchUnreadCounts]);
 
-    // Debug: Log activeChatUser changes
-    useEffect(() => {
-        console.log('activeChatUser changed:', activeChatUser);
-    }, [activeChatUser]);
 
-    // Debug: Log messages changes
-    useEffect(() => {
-        console.log('messages changed:', messages);
-    }, [messages]);
 
     // Scroll to bottom
     useEffect(() => {
@@ -144,10 +134,11 @@ const Chat = () => {
                             key={contact.user._id}
                             className={`contact-item ${username === contact.user.username ? 'active' : ''}`}
                         >
-                            <img
+                            <LazyImage
                                 src={contact.user.dp ? `/thumbnails/${contact.user.dp}` : '/thumbnails/default-user.jpg'}
                                 alt={contact.user.username}
-                                onError={(e) => { e.target.src = 'https://via.placeholder.com/40' }}
+                                className="chat-avatar"
+                                aspectRatio="1/1"
                             />
                             <div className="contact-info">
                                 <span className="contact-name">{contact.user.fullname || contact.user.username}</span>
@@ -169,10 +160,11 @@ const Chat = () => {
                             <button className="mobile-back-btn" onClick={() => navigate('/chat')}>
                                 {'<'}
                             </button>
-                            <img
+                            <LazyImage
                                 src={activeChatUser.dp ? `/thumbnails/${activeChatUser.dp}` : '/thumbnails/default-user.jpg'}
                                 alt={activeChatUser.username}
-                                onError={(e) => { e.target.src = 'https://via.placeholder.com/40' }}
+                                className="chat-header-avatar"
+                                aspectRatio="1/1"
                             />
                             <h3>{activeChatUser.fullname || activeChatUser.username}</h3>
                         </div>

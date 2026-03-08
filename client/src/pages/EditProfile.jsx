@@ -7,7 +7,7 @@ import './CreatePost.css'; // Reuse form styles
 
 const EditProfile = () => {
     const { username } = useParams();
-    const { user, loading: authLoading } = useAuth();
+    const { user, loading: authLoading, updateUser } = useAuth();
     const navigate = useNavigate();
 
     const [fullname, setFullname] = useState('');
@@ -68,6 +68,12 @@ const EditProfile = () => {
             const res = await axios.post(`/api/editprofile/${username}`, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
+
+            // Dynamically update the global user state so the Navbar photo updates instantly
+            if (res.data.user) {
+                updateUser(res.data.user);
+            }
+
             // If username changed, redirect to new profile
             if (res.data.user && res.data.user.username !== username) {
                 navigate(`/profile/${res.data.user.username}`);

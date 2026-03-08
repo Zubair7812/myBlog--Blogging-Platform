@@ -4,17 +4,22 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { formatDistanceToNow } from 'date-fns';
 import './Profile.css';
+import SkeletonLoader from '../components/SkeletonLoader';
+import EmptyState from '../components/EmptyState';
+import LazyImage from '../components/LazyImage';
+
 
 const Profile = () => {
     const { username } = useParams();
     const { user: currentUser } = useAuth();
     const [profileData, setProfileData] = useState(null);
     const [posts, setPosts] = useState([]);
+
     const [loading, setLoading] = useState(true);
     const [isFollowing, setIsFollowing] = useState(false);
     const [followersCount, setFollowersCount] = useState(0);
 
-    // Override parent content-container so the sidebar touches the left viewport edge
+    // Override parent content-container...
     useEffect(() => {
         const contentContainer = document.querySelector('.content-container');
         if (contentContainer) {
@@ -33,8 +38,10 @@ const Profile = () => {
         };
     }, []);
 
+    // Fetch Profile Data
     useEffect(() => {
         const fetchProfile = async () => {
+            setLoading(true);
             try {
                 const res = await axios.get(`/api/profile/${username}`);
                 setProfileData(res.data.userdata);
@@ -56,39 +63,59 @@ const Profile = () => {
         fetchProfile();
     }, [username, currentUser]);
 
+    // Fetch Saved Posts when tab changes to 'saved'
+
+
     const handleFollow = async () => {
         if (!currentUser) return;
+
+        // Optimistic Update
+        const previousIsFollowing = isFollowing;
+        const previousFollowersCount = followersCount;
+
+        setIsFollowing(prev => !prev);
+        setFollowersCount(prev => isFollowing ? prev - 1 : prev + 1);
+
         try {
-            if (isFollowing) {
+            if (previousIsFollowing) {
                 await axios.post(`/api/unfollow/${profileData._id}`);
-                setFollowersCount(prev => prev - 1);
-                setIsFollowing(false);
             } else {
                 await axios.post(`/api/follow/${profileData._id}`);
-                setFollowersCount(prev => prev + 1);
-                setIsFollowing(true);
             }
         } catch (err) {
             console.error(err);
+            // Revert on error
+            setIsFollowing(previousIsFollowing);
+            setFollowersCount(previousFollowersCount);
         }
     };
 
-    if (loading) return <div className="loading-screen"><div className="spinner"></div></div>;
+    if (loading) {
+        return (
+            <div className="container fade-in" style={{ marginTop: '2rem' }}>
+                <SkeletonLoader type="text" count={1} /> {/* Profile Header Skeleton */}
+                <div style={{ marginTop: '2rem' }}>
+                    <SkeletonLoader type="card" count={3} />
+                </div>
+            </div>
+        );
+    }
+
     if (!profileData) return <div className="container">User not found</div>;
 
     const isOwner = currentUser && currentUser.username === profileData.username;
 
     return (
-        <div className="profile-container-layout">
+        <div className="profile-container-layout fade-in">
             {/* Sidebar Section */}
             <aside className="profile-sidebar">
                 <div className="sidebar-content">
                     <div className="profile-avatar-wrapper">
-                        <img
+                        <LazyImage
                             src={profileData.dp ? `/thumbnails/${profileData.dp}` : '/thumbnails/default-user.jpg'}
                             alt={profileData.username}
                             className="profile-avatar-large"
-                            onError={(e) => { e.target.src = 'https://via.placeholder.com/150' }}
+                            aspectRatio="1/1"
                         />
                     </div>
 
@@ -142,13 +169,14 @@ const Profile = () => {
             {/* Main Content (Posts Grid) */}
             <main className="profile-main-content">
                 <div className="profile-posts-grid">
-                    {posts.map(post => (
+                    {posts.length > 0 ? posts.map(post => (
                         <div key={post._id} className="post-card-visual">
-                            <img
-                                src={`/thumbnails/${post.thumbnail}`}
+                            {/* Re-adding visual flair */}
+                            <LazyImage
+                                src={post.thumbnail ? `/thumbnails/${post.thumbnail}` : '/thumbnails/default.jpg'}
                                 alt={post.title}
                                 className="post-card-img"
-                                onError={(e) => { e.target.src = 'https://via.placeholder.com/400x250' }}
+                                aspectRatio="16/9"
                             />
                             <div className="post-card-body">
                                 <span className="post-time">{formatDistanceToNow(new Date(post.date), { addSuffix: true })}</span>
@@ -166,10 +194,12 @@ const Profile = () => {
                                 </div>
                             </div>
                         </div>
-                    ))}
-                    {posts.length === 0 && (
-                        <div className="no-posts">
-                            <p>No stories yet.</p>
+                    )) : (
+                        <div style={{ gridColumn: '1 / -1' }}>
+                            <EmptyState
+                                icon="fa-folder-open"
+                                message={`No stories from @${profileData?.username || 'user'} yet.`}
+                            />
                         </div>
                     )}
                 </div>

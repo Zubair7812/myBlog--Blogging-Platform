@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import { formatDistanceToNow } from 'date-fns';
 import './Search.css';
+import SkeletonLoader from '../components/SkeletonLoader';
+import EmptyState from '../components/EmptyState';
 
 const Search = () => {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -13,6 +15,21 @@ const Search = () => {
     const [filter, setFilter] = useState(initialFilter);
     const [results, setResults] = useState({ posts: [], users: [] });
     const [loading, setLoading] = useState(false);
+
+    const fetchResults = useCallback(async () => {
+        setLoading(true);
+        try {
+            const res = await axios.get(`/api/search?q=${query}&filter=${filter}`);
+            setResults({
+                posts: res.data.posts || [],
+                users: res.data.users || []
+            });
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    }, [query, filter]);
 
     // Debounce Search
     useEffect(() => {
@@ -27,22 +44,7 @@ const Search = () => {
         }, 300); // 300ms debounce
 
         return () => clearTimeout(delayDebounceFn);
-    }, [query, filter]);
-
-    const fetchResults = async () => {
-        setLoading(true);
-        try {
-            const res = await axios.get(`/api/search?q=${query}&filter=${filter}`);
-            setResults({
-                posts: res.data.posts || [],
-                users: res.data.users || []
-            });
-        } catch (err) {
-            console.error(err);
-        } finally {
-            setLoading(false);
-        }
-    };
+    }, [query, filter, fetchResults, setSearchParams]);
 
     const handleFilterChange = (newFilter) => {
         setFilter(newFilter);
@@ -109,20 +111,26 @@ const Search = () => {
                 </button>
             </div>
 
-            {loading && <div className="loading" style={{ textAlign: 'center', margin: '2rem' }}>Searching...</div>}
+            {loading && (
+                <div style={{ marginTop: '2rem' }}>
+                    <SkeletonLoader type="text" count={1} />
+                    <SkeletonLoader type="card" count={2} />
+                </div>
+            )}
 
             {!loading && (
-                <div className="search-results">
+                <div className="search-results fade-in">
                     {(filter === 'all' || filter === 'people') && results.users.length > 0 && (
                         <div className="results-section">
                             <h2>People</h2>
                             <div className="users-grid">
                                 {results.users.map(user => (
                                     <Link to={`/profile/${user.username}`} key={user._id} className="user-card-search">
-                                        <img
+                                        <LazyImage
                                             src={user.dp ? `/thumbnails/${user.dp}` : '/thumbnails/default-user.jpg'}
                                             alt={user.username}
-                                            onError={(e) => { e.target.src = 'https://via.placeholder.com/60' }}
+                                            className="user-dp-search"
+                                            aspectRatio="1"
                                         />
                                         <div className="user-info">
                                             <h3><HighlightText text={user.fullname} highlight={query} /></h3>
@@ -167,7 +175,10 @@ const Search = () => {
                     )}
 
                     {!loading && query && results.posts.length === 0 && results.users.length === 0 && (
-                        <p className="no-results">No results found for "{query}"</p>
+                        <EmptyState
+                            icon="fa-search"
+                            message={`No results found for "${query}"`}
+                        />
                     )}
                 </div>
             )}

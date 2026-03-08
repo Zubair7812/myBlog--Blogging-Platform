@@ -5,17 +5,21 @@ import { useAuth } from '../context/AuthContext';
 import ShareBlogModal from '../components/ShareBlogModal';
 import EmojiPickerButton from '../components/EmojiPickerButton';
 import AutoResizeTextarea from '../components/AutoResizeTextarea';
+import SkeletonLoader from '../components/SkeletonLoader';
+import ReadingProgress from '../components/ReadingProgress';
+import LazyImage from '../components/LazyImage';
 import './PostDetail.css';
+import { useRef } from 'react';
 
 import { formatDistanceToNow } from 'date-fns';
 
 const PostDetail = () => {
     const { id } = useParams();
+    const contentRef = useRef(null);
     const { user } = useAuth();
     const navigate = useNavigate();
     const [post, setPost] = useState(null);
     const [comments, setComments] = useState([]);
-    const [author, setAuthor] = useState(null);
     const [loading, setLoading] = useState(true);
     const [commentText, setCommentText] = useState('');
     const [likes, setLikes] = useState(0);
@@ -28,7 +32,6 @@ const PostDetail = () => {
                 const res = await axios.get(`/api/posts/${id}`);
                 setPost(res.data.post);
                 setComments(res.data.comments);
-                setAuthor(res.data.authorUser);
                 setLikes(res.data.post.like);
                 if (user && res.data.post.likedby.includes(user.username)) {
                     setIsLiked(true);
@@ -45,12 +48,24 @@ const PostDetail = () => {
 
     const handleLike = async () => {
         if (!user) return navigate('/login');
+
+        // Optimistic Update
+        const previousLikes = likes;
+        const previousIsLiked = isLiked;
+
+        setLikes(prev => isLiked ? prev - 1 : prev + 1);
+        setIsLiked(prev => !prev);
+
         try {
             const res = await axios.post(`/api/posts/${id}/like`);
+            // Sync with server response
             setLikes(res.data.likes);
             setIsLiked(res.data.status === 'liked');
         } catch (err) {
             console.error(err);
+            // Revert on error
+            setLikes(previousLikes);
+            setIsLiked(previousIsLiked);
         }
     };
 
@@ -76,109 +91,129 @@ const PostDetail = () => {
         }
     };
 
-    if (loading) return <div className="loading">Loading...</div>;
+    if (loading) {
+        return (
+            <div className="container post-detail-container">
+                <SkeletonLoader type="post-detail" count={1} />
+            </div>
+        );
+    }
+
     if (!post) return <div>Post not found</div>;
 
     const isOwner = user && (user.username === post.author || user.type === 'admin');
     const blogUrl = `${window.location.origin}/posts/${id}`;
 
     return (
-        <div className="container post-detail-container">
-            <div className="post-header">
-                <h1>{post.title}</h1>
-                <div className="post-meta-row">
-                    <span className="meta-author">
-                        By <Link to={`/profile/${post.author}`} className="hover-underline">{post.author}</Link>
-                    </span>
-                    <span className="meta-date">{formatDistanceToNow(new Date(post.date), { addSuffix: true })}</span>
-                </div>
+        <>
+            <ReadingProgress />
+            <div className="container post-detail-container fade-in" ref={contentRef}>
+                <div className="post-header">
+                    <h1>{post.title}</h1>
+                    <div className="post-meta-row">
+                        <span className="meta-author">
+                            By <Link to={`/profile/${post.author}`} className="hover-underline">{post.author}</Link>
+                        </span>
+                        <span className="meta-date">{formatDistanceToNow(new Date(post.date), { addSuffix: true })}</span>
+                    </div>
 
-                <div className="post-interaction-bar">
-                    {!isOwner && user && (
-                        <div className="user-actions">
-                            <Link to={`/chat/${post.author}`} className="btn btn-primary btn-sm">
-                                <i className="fas fa-comment"></i> Chat with Author
-                            </Link>
-                            <button onClick={() => setShowShareModal(true)} className="btn btn-secondary btn-sm">
-                                <i className="fas fa-share"></i> Share Blog
-                            </button>
-                        </div>
-                    )}
-
-                    {isOwner && (
-                        <div className="owner-actions">
-                            <Link to={`/edit/${id}`} className="btn btn-secondary btn-sm">Edit</Link>
-                            <button onClick={handleDelete} className="btn btn-danger btn-sm">Delete</button>
-                            <button onClick={() => setShowShareModal(true)} className="btn btn-primary btn-sm">
-                                <i className="fas fa-share"></i> Share Blog
-                            </button>
-                        </div>
-                    )}
-                </div>
-            </div>
-
-            <div className="post-image-large">
-                <img
-                    src={post.thumbnail ? `/thumbnails/${post.thumbnail}` : '/thumbnails/default.jpg'}
-                    alt={post.title}
-                    onError={(e) => { e.target.src = 'https://via.placeholder.com/800x400?text=No+Image' }}
-                />
-            </div>
-
-            <div className="post-body">
-                <p>{post.content}</p>
-            </div>
-
-            <div className="interaction-section">
-                <button
-                    className={`btn-like ${isLiked ? 'liked' : ''}`}
-                    onClick={handleLike}
-                >
-                    ♥ {likes} Likes
-                </button>
-            </div>
-
-            <div className="comments-section">
-                <h3>Comments ({comments.length})</h3>
-                {user && (
-                    <form onSubmit={handleComment} className="comment-form">
-                        <div className="comment-input-wrapper">
-                            <AutoResizeTextarea
-                                value={commentText}
-                                onChange={(e) => setCommentText(e.target.value)}
-                                placeholder="Add a comment..."
-                                minRows={3}
-                            />
-                            <div className="comment-emoji-btn">
-                                <EmojiPickerButton onEmojiClick={(emoji) => setCommentText(prev => prev + emoji)} />
-                            </div>
-                        </div>
-                        <button type="submit" className="btn btn-primary">Post Comment</button>
-                    </form>
-                )}
-
-                <div className="comments-list">
-                    {comments.map(comment => (
-                        <div key={comment._id} className="comment-item">
-                            <strong>
-                                <Link to={`/profile/${comment.username}`} className="hover-underline" style={{ color: 'inherit' }}>
-                                    {comment.username}
+                    <div className="post-interaction-bar">
+                        {!isOwner && user && (
+                            <div className="user-actions">
+                                <Link to={`/chat/${post.author}`} className="btn btn-primary btn-sm">
+                                    <i className="fas fa-comment"></i> Chat with Author
                                 </Link>
-                            </strong>
-                            <p>{comment.content}</p>
-                            <small>{formatDistanceToNow(new Date(comment.date), { addSuffix: true })}</small>
-                        </div>
-                    ))}
-                </div>
-            </div>
+                                <button onClick={() => setShowShareModal(true)} className="btn btn-secondary btn-sm">
+                                    <i className="fas fa-share"></i> Share Blog
+                                </button>
+                            </div>
+                        )}
 
-            <ShareBlogModal
-                isOpen={showShareModal}
-                onClose={() => setShowShareModal(false)}
-                blogTitle={post.title}
-                blogUrl={blogUrl}
-            />
-        </div>
+                        {isOwner && (
+                            <div className="owner-actions">
+                                <Link to={`/edit/${id}`} className="btn btn-secondary btn-sm">Edit</Link>
+                                <button onClick={handleDelete} className="btn btn-danger btn-sm">Delete</button>
+                                <button onClick={() => setShowShareModal(true)} className="btn btn-primary btn-sm">
+                                    <i className="fas fa-share"></i> Share Blog
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div >
+
+                <div className="post-image-large">
+                    <LazyImage
+                        src={post.thumbnail ? `/thumbnails/${post.thumbnail}` : '/thumbnails/default.jpg'}
+                        alt={post.title}
+                        priority={true}
+                        aspectRatio="21/9" // Adjust based on your design, usually hero images are wider
+                    />
+                </div>
+
+                <div className="post-body">
+                    <p>{post.content}</p>
+                    {post.tags && post.tags.length > 0 && (
+                        <div className="post-tags">
+                            {post.tags.map(tag => (
+                                <Link key={tag} to={`/search?q=${tag}&filter=posts`} className="post-tag">
+                                    #{tag}
+                                </Link>
+                            ))}
+                        </div>
+                    )}
+                </div>
+
+                <div className="interaction-section">
+                    <button
+                        className={`btn-like ${isLiked ? 'liked' : ''}`}
+                        onClick={handleLike}
+                    >
+                        <i className={`fas fa-heart ${isLiked ? 'heart-pop' : ''}`}></i> {likes} Likes
+                    </button>
+                </div>
+
+                <div className="comments-section">
+                    <h3>Comments ({comments.length})</h3>
+                    {user && (
+                        <form onSubmit={handleComment} className="comment-form">
+                            <div className="comment-input-wrapper">
+                                <AutoResizeTextarea
+                                    value={commentText}
+                                    onChange={(e) => setCommentText(e.target.value)}
+                                    placeholder="Add a comment..."
+                                    minRows={3}
+                                />
+                                <div className="comment-emoji-btn">
+                                    <EmojiPickerButton onEmojiClick={(emoji) => setCommentText(prev => prev + emoji)} />
+                                </div>
+                            </div>
+                            <button type="submit" className="btn btn-primary">Post Comment</button>
+                        </form>
+                    )}
+
+                    <div className="comments-list">
+                        {comments.map(comment => (
+                            <div key={comment._id} className="comment-item">
+                                <strong>
+                                    <Link to={`/profile/${comment.username}`} className="hover-underline" style={{ color: 'inherit' }}>
+                                        {comment.username}
+                                    </Link>
+                                </strong>
+                                <p>{comment.content}</p>
+                                <small>{formatDistanceToNow(new Date(comment.date), { addSuffix: true })}</small>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                <ShareBlogModal
+                    isOpen={showShareModal}
+                    onClose={() => setShowShareModal(false)}
+                    blogTitle={post.title}
+                    blogUrl={blogUrl}
+                />
+            </div >
+        </>
     );
 };
 

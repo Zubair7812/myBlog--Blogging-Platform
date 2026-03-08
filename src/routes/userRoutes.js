@@ -1,189 +1,28 @@
 const express = require("express");
 const router = express.Router();
-const User = require("../models/User");
-const Blog = require("../models/Blog");
-const Notification = require("../models/Notification");
-const multer = require("multer");
-const path = require("path");
 
-// Middleware to check auth
+// Middleware
 const { protect } = require("../middleware/authMiddleware");
+const { upload } = require("../middleware/uploadMiddleware");
 
-// Middleware to check auth
-// const checkAuth = (req, res, next) => {
-//     if (req.session.username) {
-//         next();
-//     } else {
-//         res.status(401).json({ error: "Unauthorized" });
-//     }
-// };
+// Controllers
+const {
+    getUserProfile,
+    updateProfile,
+    followUser,
+    unfollowUser,
+    getAdminData,
+    removeUser
+} = require("../controllers/userController");
 
-// Multer for Profile Pics
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => { cb(null, "public/thumbnails"); },
-    filename: (req, file, cb) => { cb(null, Date.now() + path.extname(file.originalname)); },
-});
-const upload = multer({ storage: storage });
+// Routes
+router.get("/profile/:username", protect, getUserProfile);
+router.post("/editprofile/:username", protect, upload.single("image"), updateProfile);
+router.post("/follow/:id", protect, followUser);
+router.post("/unfollow/:id", protect, unfollowUser);
 
-// Profile Page
-router.get("/profile/:username", protect, async (req, res) => {
-    try {
-        const user = await User.findOne({ username: req.params.username });
-        if (!user) return res.status(404).json({ error: "User not found" });
-
-        const posts = await Blog.find({ author: user.username }).sort({ date: -1 });
-
-        // Identify current user ID
-        let currentUserId = null;
-        if (req.user && req.user.username) {
-            const currentUser = await User.findOne({ username: req.user.username });
-            currentUserId = currentUser ? currentUser._id : null;
-        }
-
-        res.json({
-            username: req.user ? req.user.username : null, // Logged in user's username
-            userdata: user, // Profile owner's data
-            posts: posts,
-            userType: req.user ? req.user.type : null,
-            currentUserId: currentUserId
-        });
-    } catch (err) {
-        console.log(err);
-        res.status(500).json({ error: "Error fetching profile" });
-    }
-});
-
-// Edit Profile Routes
-// Edit Profile Routes
-router.post("/editprofile/:username", protect, upload.single("image"), async (req, res) => {
-    try {
-        const { fullname, username, bio, fb, tw, insta } = req.body;
-        const currentUser = await User.findById(req.user._id);
-
-        if (!currentUser) return res.status(404).json({ error: "User not found" });
-
-        // Check availability if username is changing
-        if (username && username !== currentUser.username) {
-            const existingUser = await User.findOne({ username });
-            if (existingUser) {
-                return res.status(400).json({ error: "Username already taken" });
-            }
-        }
-
-        const updateData = {
-            name: fullname || currentUser.name, // Keep name in sync
-            fullname: fullname || currentUser.fullname,
-            username: username || currentUser.username,
-            bio: bio,
-            facebook: fb,
-            twitter: tw,
-            instagram: insta
-        };
-        if (req.file) updateData.dp = req.file.filename;
-
-        const updatedUser = await User.findByIdAndUpdate(req.user._id, updateData, { new: true });
-
-        // If username changed, update all Blogs and Comments by this user
-        if (username && username !== currentUser.username) {
-            await Blog.updateMany({ author: currentUser.username }, { author: username });
-            await Comment.updateMany({ username: currentUser.username }, { username: username });
-        }
-
-        res.json({ message: "Profile updated", user: updatedUser });
-    } catch (err) {
-        console.log(err);
-        res.status(500).json({ error: "Error updating profile" });
-    }
-});
-
-// Follow User
-router.post("/follow/:id", protect, async (req, res) => {
-    try {
-        const targetUser = await User.findById(req.params.id);
-        const currentUser = await User.findOne({ username: req.user.username });
-
-        if (!targetUser || !currentUser) return res.status(400).json({ status: 'error' });
-
-        // Add to following
-        if (!currentUser.following.includes(targetUser._id)) {
-            currentUser.following.push(targetUser._id);
-            await currentUser.save();
-        }
-
-        // Add to followers
-        if (!targetUser.followers.includes(currentUser._id)) {
-            targetUser.followers.push(currentUser._id);
-            await targetUser.save();
-
-            // Create Notification
-            if (!targetUser._id.equals(currentUser._id)) {
-                await Notification.create({
-                    recipient: targetUser._id,
-                    sender: currentUser._id,
-                    type: 'follow'
-                });
-            }
-        }
-
-        res.json({ status: 'followed', followersCount: targetUser.followers.length });
-    } catch (err) {
-        console.log(err);
-        res.status(500).json({ status: 'error' });
-    }
-});
-
-// Unfollow User
-router.post("/unfollow/:id", protect, async (req, res) => {
-    try {
-        const targetUser = await User.findById(req.params.id);
-        const currentUser = await User.findOne({ username: req.user.username });
-
-        if (!targetUser || !currentUser) return res.status(400).json({ status: 'error' });
-
-        // Remove from following
-        currentUser.following = currentUser.following.filter(id => !id.equals(targetUser._id));
-        await currentUser.save();
-
-        // Remove from followers
-        targetUser.followers = targetUser.followers.filter(id => !id.equals(currentUser._id));
-        await targetUser.save();
-
-        res.json({ status: 'unfollowed', followersCount: targetUser.followers.length });
-    } catch (err) {
-        console.log(err);
-        res.status(500).json({ status: 'error' });
-    }
-});
-
-// Admin Dashboard Data
-router.get("/admin", protect, async (req, res) => {
-    if (req.user.type === 'admin') {
-        try {
-            const profiles = await User.find({});
-            const posts = await Blog.find({});
-            res.json({ profiles, posts });
-        } catch (err) {
-            res.status(500).json({ error: "Error fetching admin data" });
-        }
-    } else {
-        res.status(403).json({ error: "Unauthorized" });
-    }
-});
-
-// Remove User (Admin)
-router.delete("/removeuser/:id", protect, async (req, res) => {
-    if (req.user.type === 'admin') {
-        const user = await User.findById(req.params.id);
-        if (user) {
-            await Blog.deleteMany({ author: user.username });
-            await User.findByIdAndDelete(req.params.id);
-            res.json({ message: "User removed" });
-        } else {
-            res.status(404).json({ error: "User not found" });
-        }
-    } else {
-        res.status(403).json({ error: "Unauthorized" });
-    }
-});
+// Admin Routes
+router.get("/admin", protect, getAdminData);
+router.delete("/removeuser/:id", protect, removeUser);
 
 module.exports = router;
