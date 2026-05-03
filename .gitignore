@@ -1,7 +1,9 @@
 node_modules/
-client/node_modules/
-.env
+backend/node_modules/
+frontend/node_modules/
+backend/.env
 .DS_Store
 dist/
-client/dist/
+backend/dist/
+frontend/dist/
 coverage/
