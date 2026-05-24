@@ -14,15 +14,34 @@ app.use(cors()); // Enable CORS for all routes
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static("public"));
+app.use('/api/thumbnails', express.static("public/thumbnails"));
+app.use('/thumbnails', express.static("public/thumbnails"));
 
 // Routes
-// Routes
-app.use('/api/auth', require('./routes/authRoutes'));
-app.use('/api', require('./routes/userRoutes'));
-app.use('/api', require('./routes/blogRoutes'));
-app.use('/api', require('./routes/searchRoutes'));
-app.use('/api', require('./routes/notificationRoutes'));
-app.use('/api', require('./routes/chatRoutes'));
+const authRoutes = require('./routes/authRoutes');
+const userRoutes = require('./routes/userRoutes');
+const blogRoutes = require('./routes/blogRoutes');
+const searchRoutes = require('./routes/searchRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
+const chatRoutes = require('./routes/chatRoutes');
+
+app.use('/api/auth', authRoutes);
+app.use('/auth', authRoutes);
+
+app.use('/api', userRoutes);
+app.use('/', userRoutes);
+
+app.use('/api', blogRoutes);
+app.use('/', blogRoutes);
+
+app.use('/api', searchRoutes);
+app.use('/', searchRoutes);
+
+app.use('/api', notificationRoutes);
+app.use('/', notificationRoutes);
+
+app.use('/api', chatRoutes);
+app.use('/', chatRoutes);
 
 const { errorHandler } = require('./middleware/errorMiddleware');
 
